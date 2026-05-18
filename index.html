@@ -71,7 +71,7 @@
 
         <div class="notice">
           <strong>入力ルール</strong>
-          <p>患者氏名・生年月日・保険番号と、処方内容を各項目1行の入力欄に入力します。薬品名は3文字以上入力すると候補が表示されます。候補選択でも、最後まで手入力でも入力できます。</p>
+          <p>患者氏名・生年月日・保険番号と、処方内容を各項目1行の入力欄に入力します。生年月日は8桁入力で自動的にスラッシュが入ります。薬品名は3文字以上、用法は1文字以上入力すると入力欄直下に候補が表示されます。候補選択でも最後まで手入力でも入力できます。</p>
         </div>
 
         <div class="action-row">
@@ -118,7 +118,7 @@
             <div class="section-title-row compact">
               <div>
                 <h2>レセコン入力欄</h2>
-                <p>各項目は1行入力です。Enterキーまたは右側ボタンで次項目へ移動します。</p>
+                <p>各項目は1行入力です。EnterキーまたはTabキーで次項目へ移動します。</p>
               </div>
               <button id="clearButton" class="icon-button" type="button">クリア</button>
             </div>
@@ -131,7 +131,7 @@
               </label>
               <label>
                 生年月日
-                <input id="birthDateInput" class="entry-input" type="text" inputmode="numeric" autocomplete="off" placeholder="例：1980/01/01" />
+                <input id="birthDateInput" class="entry-input" type="text" inputmode="numeric" autocomplete="off" placeholder="例：19490308 → 1949/03/08" />
               </label>
               <label>
                 保険番号
@@ -141,12 +141,11 @@
 
             <div class="input-block-title with-help">
               <span>処方内容</span>
-              <span>薬品名候補：↑↓で選択、Enter/Tabで確定</span>
+              <span>薬品名は3文字以上、用法は1文字以上で候補表示</span>
             </div>
             <div id="medInputRows" class="med-input-rows"></div>
 
             <div id="candidateBox" class="candidate-box hidden" aria-live="polite">
-              <div class="candidate-title">薬品候補 <span>↑↓で選択、Enter/Tabで確定</span></div>
               <div id="candidateList" class="candidate-list"></div>
             </div>
 

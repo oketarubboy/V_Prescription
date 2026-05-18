@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rx-input-challenge-v3';
+const CACHE_NAME = 'rx-input-challenge-v4';
 const ASSETS = [
   './',
   './index.html',

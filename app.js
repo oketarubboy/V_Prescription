@@ -77,6 +77,7 @@
   ];
 
   const DRUG_MASTER = buildDrugMaster();
+  const USAGE_MASTER = buildUsageMaster();
 
   const els = {
     setupPanel: document.querySelector('#setupPanel'),
@@ -136,7 +137,8 @@
     lastResult: null,
     candidates: [],
     candidateIndex: 0,
-    activeDrugInput: null,
+    activeCandidateInput: null,
+    activeCandidateType: '',
     composing: false
   };
 
@@ -165,6 +167,9 @@
     els.reloadRankingButton.addEventListener('click', () => showRanking());
     els.rankingMode.addEventListener('change', () => showRanking());
     els.installButton.addEventListener('click', installPwa);
+    els.birthDateInput.addEventListener('input', () => formatBirthDateInput(els.birthDateInput));
+    window.addEventListener('resize', positionCandidateBox);
+    window.addEventListener('scroll', positionCandidateBox, true);
 
     window.addEventListener('beforeinstallprompt', (event) => {
       event.preventDefault();
@@ -222,7 +227,7 @@
     state.prescriptionStartedAt = Date.now();
     state.checked = false;
     state.lastResult = null;
-    hideDrugCandidates();
+    hideCandidates();
     renderPrescription();
     renderInputForm();
     els.resultBox.classList.add('hidden');
@@ -275,7 +280,7 @@
         usage,
         fields: [
           { key: 'name', label: '薬品名', expected: template.name },
-          { key: 'totalQuantity', label: '処方された全量', expected: totalQuantity },
+          { key: 'totalQuantity', label: '処方された全量', expected: quantityInputText(totalQuantity) },
           { key: 'site', label: '使用部位', expected: site },
           { key: 'usage', label: '用法', expected: usage }
         ]
@@ -284,7 +289,8 @@
     if (template.type === 'prn') {
       const perDose = sample(template.perDoses);
       const timing = sample(template.timings);
-      const timesText = `${sample(template.times)}回分`;
+      const times = sample(template.times);
+      const timesText = `${times}回分`;
       return {
         ...base,
         perDose,
@@ -292,15 +298,16 @@
         timesText,
         fields: [
           { key: 'name', label: '薬品名', expected: template.name },
-          { key: 'perDose', label: '1回使用量', expected: perDose },
+          { key: 'perDose', label: '1回使用量', expected: quantityInputText(perDose) },
           { key: 'timing', label: '服用（使用）タイミング', expected: timing },
-          { key: 'timesText', label: '回分', expected: timesText }
+          { key: 'timesText', label: '回分', expected: String(times) }
         ]
       };
     }
     const amount = sample(template.amounts);
     const usage = sample(template.usages);
-    const daysText = `${sample(template.days)}日分`;
+    const days = sample(template.days);
+    const daysText = `${days}日分`;
     return {
       ...base,
       amount,
@@ -308,9 +315,9 @@
       daysText,
       fields: [
         { key: 'name', label: '薬品名', expected: template.name },
-        { key: 'amount', label: '用量', expected: amount },
+        { key: 'amount', label: '用量', expected: quantityInputText(amount) },
         { key: 'usage', label: '用法', expected: usage },
-        { key: 'daysText', label: '日数', expected: daysText }
+        { key: 'daysText', label: '日数', expected: String(days) }
       ]
     };
   }
@@ -354,17 +361,16 @@
   }
 
   function renderMedInputRow(item, index) {
-    const fieldsHtml = item.fields.map((field, fieldIndex) => {
-      const nextField = item.fields[fieldIndex + 1];
-      const inputHtml = `<input class="entry-input med-field ${field.key === 'name' ? 'drug-name-input' : ''}" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" data-row="${index}" data-field="${escapeHtml(field.key)}" placeholder="${escapeHtml(field.label)}" />`;
-      const buttonHtml = nextField ? `<button class="move-button" type="button" data-move-row="${index}" data-move-field="${escapeHtml(nextField.key)}">${moveButtonLabel(nextField)}</button>` : '';
+    const fieldsHtml = item.fields.map((field) => {
+      const classNames = ['entry-input', 'med-field'];
+      if (field.key === 'name') classNames.push('drug-name-input');
+      if (field.key === 'usage' || field.key === 'timing') classNames.push('usage-input');
+      const inputMode = isNumericOnlyField(field.key) ? ' inputmode="decimal"' : '';
+      const inputHtml = `<input class="${classNames.join(' ')}" type="text"${inputMode} autocomplete="off" autocapitalize="off" spellcheck="false" data-row="${index}" data-field="${escapeHtml(field.key)}" placeholder="${escapeHtml(inputPlaceholder(field))}" />`;
       return `
         <label>
           ${escapeHtml(field.label)}
-          <div class="${buttonHtml ? 'field-with-button' : ''}">
-            ${inputHtml}
-            ${buttonHtml}
-          </div>
+          ${inputHtml}
         </label>
       `;
     }).join('');
@@ -385,10 +391,11 @@
   function bindDynamicInputEvents() {
     [els.patientNameInput, els.birthDateInput, els.insuranceNoInput].forEach((input, index, list) => {
       input.addEventListener('keydown', (event) => {
-        if (event.key !== 'Enter' || event.isComposing) return;
+        if ((event.key !== 'Enter' && event.key !== 'Tab') || event.isComposing) return;
         event.preventDefault();
         const next = list[index + 1] || els.medInputRows.querySelector('input');
         next?.focus();
+        next?.select?.();
       });
     });
 
@@ -396,71 +403,77 @@
       input.addEventListener('compositionstart', () => { state.composing = true; });
       input.addEventListener('compositionend', () => {
         state.composing = false;
-        if (input.classList.contains('drug-name-input')) updateDrugCandidates(input);
+        updateCandidates(input);
       });
-      input.addEventListener('focus', () => {
-        if (input.classList.contains('drug-name-input')) updateDrugCandidates(input);
-        else hideDrugCandidates();
-      });
-      input.addEventListener('input', () => {
-        if (input.classList.contains('drug-name-input')) updateDrugCandidates(input);
-      });
+      input.addEventListener('focus', () => updateCandidates(input));
+      input.addEventListener('input', () => updateCandidates(input));
       input.addEventListener('keydown', handleMedFieldKeydown);
-    });
-
-    els.medInputRows.querySelectorAll('[data-move-row]').forEach((button) => {
-      button.addEventListener('click', () => focusField(Number(button.dataset.moveRow), button.dataset.moveField));
+      input.addEventListener('blur', () => {
+        setTimeout(() => {
+          if (!els.candidateBox.matches(':hover')) hideCandidates();
+        }, 120);
+      });
     });
   }
 
   function handleMedFieldKeydown(event) {
     const input = event.currentTarget;
-    if (input.classList.contains('drug-name-input') && handleCandidateKeys(event, input)) return;
-    if (event.key === 'Enter' && !event.isComposing && !state.composing) {
+    if (isAutocompleteInput(input) && handleCandidateKeys(event, input)) return;
+    if ((event.key === 'Enter' || event.key === 'Tab') && !event.isComposing && !state.composing) {
       event.preventDefault();
-      const row = Number(input.dataset.row);
-      const next = getNextFieldKey(row, input.dataset.field);
-      if (next) focusField(row, next);
-      else focusNextRowOrCheck(row);
+      hideCandidates();
+      moveToNextField(input);
     }
   }
 
   function handleCandidateKeys(event, input) {
     if (state.composing || event.isComposing) return false;
-    if (els.candidateBox.classList.contains('hidden')) return false;
-    if (!state.candidates.length) return false;
+    if (els.candidateBox.classList.contains('hidden') || !state.candidates.length) return false;
 
     if (event.key === 'ArrowDown') {
       event.preventDefault();
       state.candidateIndex = (state.candidateIndex + 1) % state.candidates.length;
-      renderDrugCandidates(input);
+      renderCandidates(input);
       return true;
     }
     if (event.key === 'ArrowUp') {
       event.preventDefault();
       state.candidateIndex = (state.candidateIndex - 1 + state.candidates.length) % state.candidates.length;
-      renderDrugCandidates(input);
+      renderCandidates(input);
       return true;
     }
     if (event.key === 'Enter' || event.key === 'Tab') {
       event.preventDefault();
-      chooseDrugCandidate(state.candidates[state.candidateIndex], input);
+      chooseCandidate(state.candidates[state.candidateIndex], input);
       return true;
     }
     if (event.key === 'Escape') {
       event.preventDefault();
-      hideDrugCandidates();
+      hideCandidates();
       return true;
     }
     return false;
   }
 
-  function updateDrugCandidates(input) {
+  function updateCandidates(input) {
     if (!input || state.composing) return;
-    state.activeDrugInput = input;
+    if (input.classList.contains('drug-name-input')) {
+      updateDrugCandidates(input);
+      return;
+    }
+    if (input.classList.contains('usage-input')) {
+      updateUsageCandidates(input);
+      return;
+    }
+    hideCandidates();
+  }
+
+  function updateDrugCandidates(input) {
+    state.activeCandidateInput = input;
+    state.activeCandidateType = 'drug';
     const query = input.value;
     if (countSearchChars(query) < 3) {
-      hideDrugCandidates();
+      hideCandidates();
       return;
     }
     const normalized = normalizeSearchText(query);
@@ -469,48 +482,93 @@
         const nameHit = drug.searchName.includes(normalized);
         const readingHit = drug.searchReading.includes(normalized);
         const starts = drug.searchName.startsWith(normalized) || drug.searchReading.startsWith(normalized);
-        return { ...drug, score: starts ? 2 : (nameHit || readingHit ? 1 : 0) };
+        return { ...drug, value: drug.name, sub: `${drug.department} / ${drug.theme}`, score: starts ? 2 : (nameHit || readingHit ? 1 : 0) };
       })
-      .filter(drug => drug.score > 0)
+      .filter(item => item.score > 0)
       .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'ja'))
       .slice(0, 8);
     state.candidateIndex = 0;
-    renderDrugCandidates(input);
+    renderCandidates(input);
   }
 
-  function renderDrugCandidates(input = state.activeDrugInput) {
+  function updateUsageCandidates(input) {
+    state.activeCandidateInput = input;
+    state.activeCandidateType = 'usage';
+    const query = input.value;
+    if (countSearchChars(query) < 1) {
+      hideCandidates();
+      return;
+    }
+    const normalized = normalizeSearchText(query);
+    state.candidates = USAGE_MASTER
+      .map((usage) => {
+        const hit = usage.searchText.includes(normalized);
+        const starts = usage.searchText.startsWith(normalized);
+        return { ...usage, value: usage.text, name: usage.text, sub: usage.kind, score: starts ? 2 : (hit ? 1 : 0) };
+      })
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score || a.text.localeCompare(b.text, 'ja'))
+      .slice(0, 8);
+    state.candidateIndex = 0;
+    renderCandidates(input);
+  }
+
+  function renderCandidates(input = state.activeCandidateInput) {
     if (!state.candidates.length || !input) {
-      hideDrugCandidates();
+      hideCandidates();
       return;
     }
     els.candidateBox.classList.remove('hidden');
-    els.candidateList.innerHTML = state.candidates.map((drug, index) => `
+    els.candidateList.innerHTML = state.candidates.map((item, index) => `
       <button type="button" class="candidate-item ${index === state.candidateIndex ? 'active' : ''}" data-index="${index}">
-        <strong>${escapeHtml(drug.name)}</strong>
-        <span>${escapeHtml(drug.department)} / ${escapeHtml(drug.theme)}</span>
+        <strong>${escapeHtml(item.value)}</strong>
+        ${item.sub ? `<span>${escapeHtml(item.sub)}</span>` : ''}
       </button>
     `).join('');
     els.candidateList.querySelectorAll('.candidate-item').forEach((button) => {
       button.addEventListener('mousedown', (event) => event.preventDefault());
-      button.addEventListener('click', () => chooseDrugCandidate(state.candidates[Number(button.dataset.index)], input));
+      button.addEventListener('click', () => chooseCandidate(state.candidates[Number(button.dataset.index)], input));
     });
+    positionCandidateBox(input);
   }
 
-  function chooseDrugCandidate(drug, input = state.activeDrugInput) {
-    if (!drug || !input) return;
-    input.value = drug.name;
-    hideDrugCandidates();
+  function chooseCandidate(item, input = state.activeCandidateInput) {
+    if (!item || !input) return;
+    input.value = item.value;
+    hideCandidates();
     input.focus();
-    const row = Number(input.dataset.row);
-    const next = getNextFieldKey(row, 'name');
-    if (next) focusField(row, next);
+    moveToNextField(input);
   }
 
-  function hideDrugCandidates() {
+  function hideCandidates() {
     els.candidateBox.classList.add('hidden');
     els.candidateList.innerHTML = '';
+    els.candidateBox.style.left = '';
+    els.candidateBox.style.top = '';
+    els.candidateBox.style.width = '';
     state.candidates = [];
     state.candidateIndex = 0;
+    state.activeCandidateType = '';
+  }
+
+  function positionCandidateBox(input = state.activeCandidateInput) {
+    if (!input || els.candidateBox.classList.contains('hidden')) return;
+    const rect = input.getBoundingClientRect();
+    const margin = 4;
+    els.candidateBox.style.left = `${Math.max(8, rect.left)}px`;
+    els.candidateBox.style.top = `${Math.min(window.innerHeight - 60, rect.bottom + margin)}px`;
+    els.candidateBox.style.width = `${Math.max(220, rect.width)}px`;
+  }
+
+  function isAutocompleteInput(input) {
+    return input?.classList?.contains('drug-name-input') || input?.classList?.contains('usage-input');
+  }
+
+  function moveToNextField(input) {
+    const row = Number(input.dataset.row);
+    const next = getNextFieldKey(row, input.dataset.field);
+    if (next) focusField(row, next);
+    else focusNextRowOrCheck(row);
   }
 
   function getNextFieldKey(rowIndex, currentKey) {
@@ -540,7 +598,7 @@
   function clearAllInputs() {
     clearPatientInputs();
     els.medInputRows.querySelectorAll('input').forEach(input => { input.value = ''; });
-    hideDrugCandidates();
+    hideCandidates();
     els.resultBox.classList.add('hidden');
     els.resultBox.innerHTML = '';
     els.patientNameInput.focus();
@@ -650,7 +708,7 @@
     }
     if (state.timerId) clearInterval(state.timerId);
     state.timerId = null;
-    hideDrugCandidates();
+    hideCandidates();
     els.gamePanel.classList.add('hidden');
     els.finishPanel.classList.remove('hidden');
     const elapsed = Math.round((Date.now() - state.startedAt) / 1000);
@@ -778,6 +836,31 @@
     els.accuracyValue.textContent = `${Math.round(averageAccuracy * 100)}%`;
   }
 
+  function formatBirthDateInput(input) {
+    const digits = String(input.value || '').replace(/\D/g, '').slice(0, 8);
+    let formatted = digits;
+    if (digits.length > 4) formatted = `${digits.slice(0, 4)}/${digits.slice(4, 6)}`;
+    if (digits.length > 6) formatted = `${digits.slice(0, 4)}/${digits.slice(4, 6)}/${digits.slice(6, 8)}`;
+    input.value = formatted;
+  }
+
+  function quantityInputText(value) {
+    const normalized = String(value || '').normalize('NFKC').trim();
+    const match = normalized.match(/^([0-9]+(?:\.[0-9]+)?)/);
+    return match ? match[1] : normalized;
+  }
+
+  function isNumericOnlyField(key) {
+    return ['amount', 'perDose', 'totalQuantity', 'daysText', 'timesText'].includes(key);
+  }
+
+  function inputPlaceholder(field) {
+    if (isNumericOnlyField(field.key)) return `${field.label}（数字のみ）`;
+    if (field.key === 'usage') return '例：朝 / 分1 / 毎食後';
+    if (field.key === 'timing') return '例：疼痛時 / 発熱時';
+    return field.label;
+  }
+
   function buildDrugMaster() {
     const map = new Map();
     MED_SETS.forEach((set) => {
@@ -795,18 +878,26 @@
     return [...map.values()].sort((a, b) => a.name.localeCompare(b.name, 'ja'));
   }
 
+  function buildUsageMaster() {
+    const map = new Map();
+    const add = (text, kind) => {
+      if (!text || map.has(text)) return;
+      map.set(text, { text, kind, searchText: normalizeSearchText(text) });
+    };
+    ['分1 朝食後', '分1 朝食前', '分1 夕食後', '分2 朝夕食後', '分2 朝食後・夕食後', '分3 毎食後', '分3 毎食前', '1日1回', '1日2回', '疼痛時', '発熱時'].forEach(text => add(text, '標準候補'));
+    MED_SETS.forEach((set) => {
+      set.drugs.forEach((drug) => {
+        (drug.usages || []).forEach(text => add(text, `${set.department} / ${set.theme}`));
+        (drug.timings || []).forEach(text => add(text, '頓服タイミング'));
+      });
+    });
+    return [...map.values()].sort((a, b) => a.text.localeCompare(b.text, 'ja'));
+  }
+
   function typeLabel(type) {
     return ({ regular: '内服', external: '外用', prn: '頓服' })[type] || '内服';
   }
 
-  function moveButtonLabel(field) {
-    if (field.key === 'totalQuantity') return '全量';
-    if (field.key === 'site') return '使用部位';
-    if (field.key === 'perDose') return '1回使用量';
-    if (field.key === 'timing') return 'タイミング';
-    if (field.key === 'timesText') return '回分';
-    return field.label;
-  }
 
   function itemDisplayText(item) {
     if (item.type === 'external') return `${item.name}　${item.totalQuantity}　${item.site}　${item.usage}`;
@@ -832,7 +923,7 @@
       .normalize('NFKC')
       .toLowerCase()
       .replace(/[\s　]+/g, '')
-      .replace(/[・･,，、。\.]/g, '')
+      .replace(/[・･,，、。\.\/／]/g, '')
       .replace(/[‐―ｰー－-]/g, '')
       .replace(/錠剤/g, '錠')
       .trim();
