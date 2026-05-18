@@ -1,0 +1,25 @@
+{
+  "name": "処方箋入力チャレンジ",
+  "short_name": "処方入力",
+  "description": "ランダム処方箋をレセコン形式で入力するPWA練習ゲーム",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#0f766e",
+  "background_color": "#eef8f7",
+  "icons": [
+    {
+      "src": "./assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

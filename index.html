@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f766e" />
+  <title>処方箋入力チャレンジ</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./assets/icon-192.png" />
+  <link rel="apple-touch-icon" href="./assets/icon-192.png" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">PWA Training Game</p>
+        <h1>処方箋入力チャレンジ</h1>
+        <p class="hero-copy">ランダム処方箋を見ながら、レセコン入力形式で素早く正確に入力します。</p>
+      </div>
+      <div class="hero-badges">
+        <span id="installStatus" class="badge">PWA対応</span>
+        <span class="badge ghost">GitHub Pages対応</span>
+      </div>
+    </header>
+
+    <main>
+      <section id="setupPanel" class="panel setup-panel">
+        <div class="section-title-row">
+          <div>
+            <h2>ゲーム設定</h2>
+            <p>枚数モードを選んで開始してください。</p>
+          </div>
+          <button id="installButton" class="sub-button hidden" type="button">ホーム画面に追加</button>
+        </div>
+
+        <div class="mode-grid" role="radiogroup" aria-label="入力枚数モード">
+          <label class="mode-card selected">
+            <input type="radio" name="mode" value="1" checked />
+            <strong>1枚入力</strong>
+            <span>練習向け</span>
+          </label>
+          <label class="mode-card">
+            <input type="radio" name="mode" value="3" />
+            <strong>3枚入力</strong>
+            <span>短時間勝負</span>
+          </label>
+          <label class="mode-card">
+            <input type="radio" name="mode" value="5" />
+            <strong>5枚入力</strong>
+            <span>標準モード</span>
+          </label>
+          <label class="mode-card">
+            <input type="radio" name="mode" value="10" />
+            <strong>10枚入力</strong>
+            <span>全国ランキング向け</span>
+          </label>
+          <label class="mode-card">
+            <input type="radio" name="mode" value="endless" />
+            <strong>エンドレス</strong>
+            <span>止めるまで継続</span>
+          </label>
+        </div>
+
+        <div class="form-grid">
+          <label>
+            プレイヤー名
+            <input id="playerName" type="text" maxlength="20" placeholder="例：中野" autocomplete="nickname" />
+          </label>
+          <label>
+            GAS WebアプリURL
+            <input id="gasUrl" type="url" value="https://script.google.com/macros/s/AKfycbzKs2dbznSXPyNJWY0L2Wzfed5m834wBa8FLP9paAyaSJZ6dIx-eST16D3eTVICBs2rRw/exec" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off" />
+          </label>
+        </div>
+
+        <div class="notice">
+          <strong>入力ルール</strong>
+          <p>1薬剤1行で「薬品名 用量 用法 日数」を入力します。薬品名を3文字以上入力すると候補が表示されます。候補選択でも、最後まで手入力でも入力できます。</p>
+        </div>
+
+        <div class="action-row">
+          <button id="startButton" class="primary-button" type="button">ゲーム開始</button>
+          <button id="rankingButton" class="sub-button" type="button">ランキング表示</button>
+        </div>
+      </section>
+
+      <section id="gamePanel" class="game-grid hidden">
+        <div class="left-column">
+          <section class="panel score-panel">
+            <div class="stat-card">
+              <span>現在スコア</span>
+              <strong id="scoreValue">0</strong>
+            </div>
+            <div class="stat-card">
+              <span>経過時間</span>
+              <strong id="timerValue">00:00</strong>
+            </div>
+            <div class="stat-card">
+              <span>進捗</span>
+              <strong id="progressValue">1 / 1</strong>
+            </div>
+            <div class="stat-card">
+              <span>正確率</span>
+              <strong id="accuracyValue">100%</strong>
+            </div>
+          </section>
+
+          <section class="panel prescription-panel">
+            <div class="section-title-row compact">
+              <div>
+                <h2>処方箋</h2>
+                <p id="rxMeta">-</p>
+              </div>
+              <span id="difficultyBadge" class="difficulty">標準</span>
+            </div>
+            <article id="prescriptionCard" class="prescription-card"></article>
+          </section>
+        </div>
+
+        <div class="right-column">
+          <section class="panel input-panel">
+            <div class="section-title-row compact">
+              <div>
+                <h2>レセコン入力欄</h2>
+                <p>キーボード入力・スマホのフリック入力に対応</p>
+              </div>
+              <button id="clearButton" class="icon-button" type="button">クリア</button>
+            </div>
+            <textarea id="answerInput" rows="9" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="例：
+アムロジピンOD錠5mg 1錠 分1 朝食後 28日分
+ロキソプロフェンNa錠60mg 1錠 疼痛時 10回分"></textarea>
+            <div id="candidateBox" class="candidate-box hidden" aria-live="polite">
+              <div class="candidate-title">薬品候補 <span>↑↓で選択、Enter/Tabで確定</span></div>
+              <div id="candidateList" class="candidate-list"></div>
+            </div>
+
+            <div class="assist-area">
+              <p>入力補助</p>
+              <div id="assistChips" class="chip-row"></div>
+            </div>
+
+            <div id="resultBox" class="result-box hidden"></div>
+
+            <div class="action-row sticky-actions">
+              <button id="checkButton" class="primary-button" type="button">判定する</button>
+              <button id="nextButton" class="sub-button hidden" type="button">次の処方箋へ</button>
+              <button id="finishButton" class="danger-button" type="button">終了して登録</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="finishPanel" class="panel finish-panel hidden">
+        <h2>結果</h2>
+        <div class="final-score" id="finalScore">0</div>
+        <div id="finalSummary" class="summary-grid"></div>
+        <div id="submitStatus" class="submit-status"></div>
+        <div class="action-row">
+          <button id="submitScoreButton" class="primary-button" type="button">全国ランキングに登録</button>
+          <button id="playAgainButton" class="sub-button" type="button">もう一度プレイ</button>
+          <button id="showRankingAfterButton" class="sub-button" type="button">ランキングを見る</button>
+        </div>
+      </section>
+
+      <section id="rankingPanel" class="panel ranking-panel hidden">
+        <div class="section-title-row">
+          <div>
+            <h2>全国ランキング</h2>
+            <p>GAS連携後に表示されます。未設定時は端末内ベストを表示します。</p>
+          </div>
+          <button id="closeRankingButton" class="sub-button" type="button">閉じる</button>
+        </div>
+        <div class="ranking-controls">
+          <label>
+            モード
+            <select id="rankingMode">
+              <option value="all">すべて</option>
+              <option value="1">1枚入力</option>
+              <option value="3">3枚入力</option>
+              <option value="5">5枚入力</option>
+              <option value="10">10枚入力</option>
+              <option value="endless">エンドレス</option>
+            </select>
+          </label>
+          <button id="reloadRankingButton" class="sub-button" type="button">再読込</button>
+        </div>
+        <div id="rankingList" class="ranking-list"></div>
+      </section>
+    </main>
+
+    <footer>
+      <p>このゲームは入力練習用の架空データです。実在の処方・患者情報ではありません。</p>
+    </footer>
+  </div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
