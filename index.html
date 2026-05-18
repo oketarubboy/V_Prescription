@@ -16,7 +16,7 @@
       <div>
         <p class="eyebrow">PWA Training Game</p>
         <h1>処方箋入力チャレンジ</h1>
-        <p class="hero-copy">ランダム処方箋を見ながら、レセコン入力形式で素早く正確に入力します。</p>
+        <p class="hero-copy">ランダム処方箋を見ながら、患者情報と処方内容をレセコン形式で素早く正確に入力します。</p>
       </div>
       <div class="hero-badges">
         <span id="installStatus" class="badge">PWA対応</span>
@@ -62,20 +62,16 @@
           </label>
         </div>
 
-        <div class="form-grid">
+        <div class="form-grid single">
           <label>
             プレイヤー名
             <input id="playerName" type="text" maxlength="20" placeholder="例：中野" autocomplete="nickname" />
-          </label>
-          <label>
-            GAS WebアプリURL
-            <input id="gasUrl" type="url" value="https://script.google.com/macros/s/AKfycbzKs2dbznSXPyNJWY0L2Wzfed5m834wBa8FLP9paAyaSJZ6dIx-eST16D3eTVICBs2rRw/exec" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off" />
           </label>
         </div>
 
         <div class="notice">
           <strong>入力ルール</strong>
-          <p>1薬剤1行で「薬品名 用量 用法 日数」を入力します。薬品名を3文字以上入力すると候補が表示されます。候補選択でも、最後まで手入力でも入力できます。</p>
+          <p>患者氏名・生年月日・保険番号と、処方内容を各項目1行の入力欄に入力します。薬品名は3文字以上入力すると候補が表示されます。候補選択でも、最後まで手入力でも入力できます。</p>
         </div>
 
         <div class="action-row">
@@ -122,21 +118,36 @@
             <div class="section-title-row compact">
               <div>
                 <h2>レセコン入力欄</h2>
-                <p>キーボード入力・スマホのフリック入力に対応</p>
+                <p>各項目は1行入力です。Enterキーまたは右側ボタンで次項目へ移動します。</p>
               </div>
               <button id="clearButton" class="icon-button" type="button">クリア</button>
             </div>
-            <textarea id="answerInput" rows="9" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="例：
-アムロジピンOD錠5mg 1錠 分1 朝食後 28日分
-ロキソプロフェンNa錠60mg 1錠 疼痛時 10回分"></textarea>
+
+            <div class="input-block-title">患者情報</div>
+            <div class="patient-input-grid">
+              <label>
+                患者氏名
+                <input id="patientNameInput" class="entry-input" type="text" autocomplete="off" placeholder="患者氏名" />
+              </label>
+              <label>
+                生年月日
+                <input id="birthDateInput" class="entry-input" type="text" inputmode="numeric" autocomplete="off" placeholder="例：1980/01/01" />
+              </label>
+              <label>
+                保険番号
+                <input id="insuranceNoInput" class="entry-input" type="text" inputmode="numeric" autocomplete="off" placeholder="保険番号" />
+              </label>
+            </div>
+
+            <div class="input-block-title with-help">
+              <span>処方内容</span>
+              <span>薬品名候補：↑↓で選択、Enter/Tabで確定</span>
+            </div>
+            <div id="medInputRows" class="med-input-rows"></div>
+
             <div id="candidateBox" class="candidate-box hidden" aria-live="polite">
               <div class="candidate-title">薬品候補 <span>↑↓で選択、Enter/Tabで確定</span></div>
               <div id="candidateList" class="candidate-list"></div>
-            </div>
-
-            <div class="assist-area">
-              <p>入力補助</p>
-              <div id="assistChips" class="chip-row"></div>
             </div>
 
             <div id="resultBox" class="result-box hidden"></div>
@@ -166,7 +177,7 @@
         <div class="section-title-row">
           <div>
             <h2>全国ランキング</h2>
-            <p>GAS連携後に表示されます。未設定時は端末内ベストを表示します。</p>
+            <p>全国ランキングを表示します。通信できない場合は端末内ベストを表示します。</p>
           </div>
           <button id="closeRankingButton" class="sub-button" type="button">閉じる</button>
         </div>

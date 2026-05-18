@@ -7,7 +7,7 @@
  * 3. この Code.gs の内容を貼り付ける
  * 4. デプロイ > 新しいデプロイ > ウェブアプリ
  * 5. 実行ユーザー：自分、アクセスできるユーザー：全員
- * 6. 発行された WebアプリURL を PWA の「GAS WebアプリURL」に入力
+ * 6. 発行された WebアプリURL を app.js の DEFAULT_GAS_URL に設定
  */
 
 const SHEET_NAME = 'scores';

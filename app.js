@@ -5,76 +5,73 @@
 
   const STORAGE_KEYS = {
     player: 'rx_game_player_name',
-    gasUrl: 'rx_game_gas_url',
     localScores: 'rx_game_local_scores'
   };
 
-  const ASSIST_WORDS = [
-    '1錠', '2錠', '1包', '2包', '分1', '分2', '分3', '朝食後', '夕食後', '毎食後',
-    '就寝前', '疼痛時', '発熱時', '1日1回', '1日2回', '患部', '14日分', '28日分', '10回分'
-  ];
+  const FAMILY_NAMES = ['佐藤', '鈴木', '高橋', '田中', '伊藤', '渡辺', '山本', '中村', '小林', '加藤', '吉田', '山田', '佐々木', '山口', '松本', '井上'];
+  const GIVEN_NAMES = ['太郎', '花子', '一郎', '美咲', '健太', '陽子', '誠', '優子', '翔太', '恵', '大輔', '彩', '拓也', '真由美', '直樹', '玲子'];
 
   const MED_SETS = [
     {
-      department: '内科', theme: '血圧管理', difficulty: '標準', note: '継続処方。日数と用法を確認して入力。',
+      department: '内科', theme: '血圧管理', difficulty: '標準', note: '継続処方。患者情報、日数、用法を確認して入力。',
       drugs: [
-        { name: 'アムロジピンOD錠5mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [14, 28, 30], suffix: '日分' },
-        { name: 'テルミサルタン錠40mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [14, 28, 30], suffix: '日分' },
-        { name: 'ロスバスタチン錠2.5mg', amounts: ['1錠'], usages: ['分1 夕食後'], days: [14, 28, 30], suffix: '日分' },
-        { name: '酸化マグネシウム錠330mg', amounts: ['3錠', '6錠'], usages: ['分3 毎食後'], days: [14, 28], suffix: '日分' }
+        { type: 'regular', name: 'アムロジピンOD錠5mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [14, 28, 30] },
+        { type: 'regular', name: 'テルミサルタン錠40mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [14, 28, 30] },
+        { type: 'regular', name: 'ロスバスタチン錠2.5mg', amounts: ['1錠'], usages: ['分1 夕食後'], days: [14, 28, 30] },
+        { type: 'regular', name: '酸化マグネシウム錠330mg', amounts: ['3錠', '6錠'], usages: ['分3 毎食後'], days: [14, 28] }
       ]
     },
     {
-      department: '整形外科', theme: '疼痛管理', difficulty: 'やさしい', note: '内服薬と頓服の回数を区別して入力。',
+      department: '整形外科', theme: '疼痛管理', difficulty: 'やさしい', note: '内服薬と頓服の入力順を区別して入力。',
       drugs: [
-        { name: 'ロキソプロフェンNa錠60mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7, 14], suffix: '日分' },
-        { name: 'レバミピド錠100mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7, 14], suffix: '日分' },
-        { name: 'ロキソプロフェンNa錠60mg', amounts: ['1錠'], usages: ['疼痛時'], days: [5, 10, 15], suffix: '回分' },
-        { name: 'ケトプロフェンテープ40mg', amounts: ['21枚', '35枚'], usages: ['1日1回 患部'], days: [1], suffix: '枚' }
+        { type: 'regular', name: 'ロキソプロフェンNa錠60mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7, 14] },
+        { type: 'regular', name: 'レバミピド錠100mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7, 14] },
+        { type: 'prn', name: 'ロキソプロフェンNa錠60mg', perDoses: ['1錠'], timings: ['疼痛時'], times: [5, 10, 15] },
+        { type: 'external', name: 'ケトプロフェンテープ40mg', totals: ['21枚', '35枚'], sites: ['患部'], usages: ['1日1回'] }
       ]
     },
     {
       department: '耳鼻咽喉科', theme: '感冒症状', difficulty: '標準', note: '粉薬・錠剤が混在。薬品名と用法を正確に入力。',
       drugs: [
-        { name: 'カルボシステイン錠500mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7], suffix: '日分' },
-        { name: 'デキストロメトルファン臭化水素酸塩錠15mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7], suffix: '日分' },
-        { name: 'アセトアミノフェン錠200mg', amounts: ['2錠'], usages: ['発熱時'], days: [5, 10], suffix: '回分' },
-        { name: 'ツロブテロールテープ1mg', amounts: ['7枚'], usages: ['1日1回 胸部'], days: [1], suffix: '枚' }
+        { type: 'regular', name: 'カルボシステイン錠500mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7] },
+        { type: 'regular', name: 'デキストロメトルファン臭化水素酸塩錠15mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7] },
+        { type: 'prn', name: 'アセトアミノフェン錠200mg', perDoses: ['2錠'], timings: ['発熱時'], times: [5, 10] },
+        { type: 'external', name: 'ツロブテロールテープ1mg', totals: ['7枚'], sites: ['胸部'], usages: ['1日1回'] }
       ]
     },
     {
       department: '消化器内科', theme: '胃腸症状', difficulty: '標準', note: '食前・食後の違いに注意。',
       drugs: [
-        { name: 'ランソプラゾールOD錠15mg', amounts: ['1錠'], usages: ['分1 朝食前'], days: [14, 28], suffix: '日分' },
-        { name: 'モサプリドクエン酸塩錠5mg', amounts: ['3錠'], usages: ['分3 毎食前'], days: [7, 14], suffix: '日分' },
-        { name: 'ビオフェルミン錠剤', amounts: ['3錠', '6錠'], usages: ['分3 毎食後'], days: [7, 14], suffix: '日分' }
+        { type: 'regular', name: 'ランソプラゾールOD錠15mg', amounts: ['1錠'], usages: ['分1 朝食前'], days: [14, 28] },
+        { type: 'regular', name: 'モサプリドクエン酸塩錠5mg', amounts: ['3錠'], usages: ['分3 毎食前'], days: [7, 14] },
+        { type: 'regular', name: 'ビオフェルミン錠剤', amounts: ['3錠', '6錠'], usages: ['分3 毎食後'], days: [7, 14] }
       ]
     },
     {
       department: '小児科', theme: '小児処方', difficulty: 'むずかしい', note: '小児用量の単位と粉薬名を確認。',
       drugs: [
-        { name: 'アスベリン散10%', amounts: ['0.6g', '0.9g'], usages: ['分3 毎食後'], days: [5, 7], suffix: '日分' },
-        { name: 'ムコダインDS50%', amounts: ['1.2g', '1.5g'], usages: ['分3 毎食後'], days: [5, 7], suffix: '日分' },
-        { name: 'カロナール細粒20%', amounts: ['1.0g'], usages: ['発熱時'], days: [5, 8], suffix: '回分' },
-        { name: 'ホクナリンドライシロップ0.1%', amounts: ['0.5g'], usages: ['分2 朝夕食後'], days: [5, 7], suffix: '日分' }
+        { type: 'regular', name: 'アスベリン散10%', amounts: ['0.6g', '0.9g'], usages: ['分3 毎食後'], days: [5, 7] },
+        { type: 'regular', name: 'ムコダインDS50%', amounts: ['1.2g', '1.5g'], usages: ['分3 毎食後'], days: [5, 7] },
+        { type: 'prn', name: 'カロナール細粒20%', perDoses: ['1.0g'], timings: ['発熱時'], times: [5, 8] },
+        { type: 'regular', name: 'ホクナリンドライシロップ0.1%', amounts: ['0.5g'], usages: ['分2 朝夕食後'], days: [5, 7] }
       ]
     },
     {
-      department: '皮膚科', theme: '外用薬', difficulty: 'むずかしい', note: '外用薬は数量・使用部位を含めて入力。',
+      department: '皮膚科', theme: '外用薬', difficulty: 'むずかしい', note: '外用薬は薬品名、処方された全量、使用部位、用法の順に入力。',
       drugs: [
-        { name: 'ヒルドイドソフト軟膏0.3%', amounts: ['25g', '50g'], usages: ['1日2回 患部'], days: [1], suffix: '本' },
-        { name: 'ロコイド軟膏0.1%', amounts: ['5g', '10g'], usages: ['1日2回 患部'], days: [1], suffix: '本' },
-        { name: 'アレグラ錠60mg', amounts: ['2錠'], usages: ['分2 朝夕食後'], days: [7, 14], suffix: '日分' },
-        { name: 'ヘパリン類似物質ローション0.3%', amounts: ['50g'], usages: ['1日2回 患部'], days: [1], suffix: '本' }
+        { type: 'external', name: 'ヒルドイドソフト軟膏0.3%', totals: ['25g', '50g'], sites: ['患部'], usages: ['1日2回'] },
+        { type: 'external', name: 'ロコイド軟膏0.1%', totals: ['5g', '10g'], sites: ['患部'], usages: ['1日2回'] },
+        { type: 'regular', name: 'アレグラ錠60mg', amounts: ['2錠'], usages: ['分2 朝夕食後'], days: [7, 14] },
+        { type: 'external', name: 'ヘパリン類似物質ローション0.3%', totals: ['50g'], sites: ['患部'], usages: ['1日2回'] }
       ]
     },
     {
       department: '糖尿病内科', theme: '生活習慣病', difficulty: 'むずかしい', note: '長期処方。薬品名の数字まで入力。',
       drugs: [
-        { name: 'メトホルミン塩酸塩錠250mg', amounts: ['2錠', '3錠'], usages: ['分2 朝夕食後', '分3 毎食後'], days: [28, 30, 56], suffix: '日分' },
-        { name: 'ジャディアンス錠10mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [28, 30, 56], suffix: '日分' },
-        { name: 'グリメピリド錠1mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [28, 30], suffix: '日分' },
-        { name: 'ピオグリタゾン錠15mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [28, 30], suffix: '日分' }
+        { type: 'regular', name: 'メトホルミン塩酸塩錠250mg', amounts: ['2錠', '3錠'], usages: ['分2 朝夕食後', '分3 毎食後'], days: [28, 30, 56] },
+        { type: 'regular', name: 'ジャディアンス錠10mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [28, 30, 56] },
+        { type: 'regular', name: 'グリメピリド錠1mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [28, 30] },
+        { type: 'regular', name: 'ピオグリタゾン錠15mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [28, 30] }
       ]
     }
   ];
@@ -87,7 +84,6 @@
     finishPanel: document.querySelector('#finishPanel'),
     rankingPanel: document.querySelector('#rankingPanel'),
     playerName: document.querySelector('#playerName'),
-    gasUrl: document.querySelector('#gasUrl'),
     startButton: document.querySelector('#startButton'),
     rankingButton: document.querySelector('#rankingButton'),
     installButton: document.querySelector('#installButton'),
@@ -99,10 +95,12 @@
     rxMeta: document.querySelector('#rxMeta'),
     difficultyBadge: document.querySelector('#difficultyBadge'),
     prescriptionCard: document.querySelector('#prescriptionCard'),
-    answerInput: document.querySelector('#answerInput'),
+    patientNameInput: document.querySelector('#patientNameInput'),
+    birthDateInput: document.querySelector('#birthDateInput'),
+    insuranceNoInput: document.querySelector('#insuranceNoInput'),
+    medInputRows: document.querySelector('#medInputRows'),
     candidateBox: document.querySelector('#candidateBox'),
     candidateList: document.querySelector('#candidateList'),
-    assistChips: document.querySelector('#assistChips'),
     resultBox: document.querySelector('#resultBox'),
     clearButton: document.querySelector('#clearButton'),
     checkButton: document.querySelector('#checkButton'),
@@ -129,8 +127,8 @@
     score: 0,
     completed: 0,
     totalAccuracy: 0,
-    totalLines: 0,
-    exactLines: 0,
+    totalFields: 0,
+    exactFields: 0,
     streak: 0,
     currentRx: null,
     checked: false,
@@ -138,42 +136,22 @@
     lastResult: null,
     candidates: [],
     candidateIndex: 0,
+    activeDrugInput: null,
     composing: false
   };
 
   function init() {
     els.playerName.value = localStorage.getItem(STORAGE_KEYS.player) || '';
-    els.gasUrl.value = localStorage.getItem(STORAGE_KEYS.gasUrl) || DEFAULT_GAS_URL;
-    localStorage.setItem(STORAGE_KEYS.gasUrl, els.gasUrl.value.trim());
     setupModeCards();
-    setupAssistChips();
     bindEvents();
     registerServiceWorker();
   }
 
   function bindEvents() {
     els.playerName.addEventListener('input', () => localStorage.setItem(STORAGE_KEYS.player, els.playerName.value.trim()));
-    els.gasUrl.addEventListener('input', () => localStorage.setItem(STORAGE_KEYS.gasUrl, els.gasUrl.value.trim()));
-    els.answerInput.addEventListener('input', () => updateDrugCandidates());
-    els.answerInput.addEventListener('click', () => updateDrugCandidates());
-    els.answerInput.addEventListener('keyup', (event) => {
-      if (!['ArrowUp', 'ArrowDown', 'Enter', 'Tab', 'Escape'].includes(event.key)) updateDrugCandidates();
-    });
-    els.answerInput.addEventListener('compositionstart', () => {
-      state.composing = true;
-    });
-    els.answerInput.addEventListener('compositionend', () => {
-      state.composing = false;
-      updateDrugCandidates();
-    });
-    els.answerInput.addEventListener('keydown', handleCandidateKeys);
     els.startButton.addEventListener('click', startGame);
     els.rankingButton.addEventListener('click', () => showRanking());
-    els.clearButton.addEventListener('click', () => {
-      els.answerInput.value = '';
-      hideDrugCandidates();
-      els.answerInput.focus();
-    });
+    els.clearButton.addEventListener('click', clearAllInputs);
     els.checkButton.addEventListener('click', checkCurrentPrescription);
     els.nextButton.addEventListener('click', () => {
       if (state.mode !== 'endless' && state.completed >= state.targetCount) finishGame();
@@ -211,33 +189,6 @@
     });
   }
 
-  function setupAssistChips() {
-    els.assistChips.innerHTML = '';
-    ASSIST_WORDS.forEach((word) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'chip';
-      button.textContent = word;
-      button.addEventListener('click', () => insertAtCursor(word));
-      els.assistChips.appendChild(button);
-    });
-  }
-
-  function insertAtCursor(text) {
-    const input = els.answerInput;
-    const start = input.selectionStart ?? input.value.length;
-    const end = input.selectionEnd ?? input.value.length;
-    const before = input.value.slice(0, start);
-    const after = input.value.slice(end);
-    const prefix = before && !before.endsWith(' ') && !before.endsWith('\n') ? ' ' : '';
-    const insert = `${prefix}${text} `;
-    input.value = before + insert + after;
-    const pos = before.length + insert.length;
-    input.focus();
-    input.setSelectionRange(pos, pos);
-    updateDrugCandidates();
-  }
-
   function startGame() {
     const selected = document.querySelector('input[name="mode"]:checked');
     state.mode = selected?.value || '1';
@@ -246,14 +197,12 @@
     state.score = 0;
     state.completed = 0;
     state.totalAccuracy = 0;
-    state.totalLines = 0;
-    state.exactLines = 0;
+    state.totalFields = 0;
+    state.exactFields = 0;
     state.streak = 0;
     state.currentRx = null;
     state.lastResult = null;
-
     localStorage.setItem(STORAGE_KEYS.player, els.playerName.value.trim());
-    localStorage.setItem(STORAGE_KEYS.gasUrl, els.gasUrl.value.trim());
 
     els.setupPanel.classList.add('hidden');
     els.finishPanel.classList.add('hidden');
@@ -264,358 +213,496 @@
   }
 
   function startTimer() {
-    clearInterval(state.timerId);
-    state.timerId = setInterval(updateStatsUi, 250);
-    updateStatsUi();
-  }
-
-  function resetToSetup() {
-    clearInterval(state.timerId);
-    els.gamePanel.classList.add('hidden');
-    els.finishPanel.classList.add('hidden');
-    els.rankingPanel.classList.add('hidden');
-    els.setupPanel.classList.remove('hidden');
+    if (state.timerId) clearInterval(state.timerId);
+    state.timerId = setInterval(updateStatsUi, 500);
   }
 
   function nextPrescription() {
     state.currentRx = generatePrescription();
-    state.checked = false;
     state.prescriptionStartedAt = Date.now();
-    els.answerInput.value = '';
+    state.checked = false;
+    state.lastResult = null;
     hideDrugCandidates();
+    renderPrescription();
+    renderInputForm();
     els.resultBox.classList.add('hidden');
     els.resultBox.innerHTML = '';
     els.nextButton.classList.add('hidden');
     els.checkButton.disabled = false;
-    els.answerInput.disabled = false;
-    renderPrescription(state.currentRx);
     updateStatsUi();
-    setTimeout(() => els.answerInput.focus(), 50);
+    setTimeout(() => els.patientNameInput.focus(), 0);
   }
 
   function generatePrescription() {
     const set = sample(MED_SETS);
-    const count = randomInt(1, Math.min(4, set.drugs.length));
-    const shuffled = shuffle(set.drugs).slice(0, count);
-    const created = shuffled.map((drug) => {
-      const amount = sample(drug.amounts);
-      const usage = sample(drug.usages);
-      const day = sample(drug.days);
-      const quantity = drug.suffix === '日分' || drug.suffix === '回分' ? `${day}${drug.suffix}` : `${amount}`;
-      const displayQuantity = drug.suffix === '日分' || drug.suffix === '回分' ? `${amount} ${usage} ${day}${drug.suffix}` : `${amount} ${usage}`;
-      const expected = drug.suffix === '日分' || drug.suffix === '回分'
-        ? `${drug.name} ${amount} ${usage} ${day}${drug.suffix}`
-        : `${drug.name} ${amount} ${usage}`;
-      return { ...drug, amount, usage, day, quantity, displayQuantity, expected };
-    });
-
-    const sexes = ['男', '女'];
-    const patientNo = String(randomInt(10000, 99999));
-    const age = randomInt(set.department === '小児科' ? 4 : 22, set.department === '小児科' ? 12 : 86);
-    const date = new Date();
-    const dateText = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
-
+    const count = randomInt(2, Math.min(4, set.drugs.length));
+    const selectedDrugs = shuffle(set.drugs).slice(0, count);
+    const issueDate = new Date();
+    const patient = generatePatient();
     return {
       id: cryptoRandomId(),
+      issueDateText: formatDateSlash(issueDate),
       department: set.department,
       theme: set.theme,
       difficulty: set.difficulty,
       note: set.note,
-      patientNo,
-      patient: `架空患者 ${sample(['青葉', '若葉', '桜井', '白川', '水野', '森田'])} ${sample(['A', 'B', 'C', 'D', 'E'])}様`,
-      age,
-      sex: sample(sexes),
-      dateText,
-      drugs: created,
-      expectedLines: created.map(d => d.expected)
+      patient,
+      items: selectedDrugs.map((drug, index) => buildRxItem(drug, index + 1))
     };
   }
 
-  function renderPrescription(rx) {
-    els.rxMeta.textContent = `${rx.department} / ${rx.theme} / ${rx.drugs.length}薬剤`;
+  function generatePatient() {
+    const year = randomInt(1948, 2018);
+    const month = randomInt(1, 12);
+    const day = randomInt(1, 28);
+    return {
+      name: `${sample(FAMILY_NAMES)} ${sample(GIVEN_NAMES)}`,
+      birthDate: `${year}/${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}`,
+      insuranceNo: `${randomInt(10, 99)}${randomInt(100000, 999999)}${randomInt(10, 99)}`
+    };
+  }
+
+  function buildRxItem(template, number) {
+    const base = { number, type: template.type, name: template.name };
+    if (template.type === 'external') {
+      const totalQuantity = sample(template.totals);
+      const site = sample(template.sites);
+      const usage = sample(template.usages);
+      return {
+        ...base,
+        totalQuantity,
+        site,
+        usage,
+        fields: [
+          { key: 'name', label: '薬品名', expected: template.name },
+          { key: 'totalQuantity', label: '処方された全量', expected: totalQuantity },
+          { key: 'site', label: '使用部位', expected: site },
+          { key: 'usage', label: '用法', expected: usage }
+        ]
+      };
+    }
+    if (template.type === 'prn') {
+      const perDose = sample(template.perDoses);
+      const timing = sample(template.timings);
+      const timesText = `${sample(template.times)}回分`;
+      return {
+        ...base,
+        perDose,
+        timing,
+        timesText,
+        fields: [
+          { key: 'name', label: '薬品名', expected: template.name },
+          { key: 'perDose', label: '1回使用量', expected: perDose },
+          { key: 'timing', label: '服用（使用）タイミング', expected: timing },
+          { key: 'timesText', label: '回分', expected: timesText }
+        ]
+      };
+    }
+    const amount = sample(template.amounts);
+    const usage = sample(template.usages);
+    const daysText = `${sample(template.days)}日分`;
+    return {
+      ...base,
+      amount,
+      usage,
+      daysText,
+      fields: [
+        { key: 'name', label: '薬品名', expected: template.name },
+        { key: 'amount', label: '用量', expected: amount },
+        { key: 'usage', label: '用法', expected: usage },
+        { key: 'daysText', label: '日数', expected: daysText }
+      ]
+    };
+  }
+
+  function renderPrescription() {
+    const rx = state.currentRx;
+    els.rxMeta.textContent = `${rx.department} / ${rx.theme} / ${rx.issueDateText}`;
     els.difficultyBadge.textContent = rx.difficulty;
     els.prescriptionCard.innerHTML = `
       <div class="rx-header">
         <div>
-          <div class="rx-title">処方箋入力練習票</div>
-          <div class="rx-small">処方日：${escapeHtml(rx.dateText)} / 受付番号：${escapeHtml(rx.patientNo)}</div>
+          <div class="rx-title">処方箋</div>
+          <div class="rx-small">${escapeHtml(rx.department)}・${escapeHtml(rx.theme)}</div>
         </div>
-        <div class="rx-small">${escapeHtml(rx.department)}</div>
+        <div class="rx-small">交付日 ${escapeHtml(rx.issueDateText)}</div>
       </div>
       <div class="rx-body">
         <dl>
-          <div class="rx-row"><dt>患者</dt><dd>${escapeHtml(rx.patient)}（${rx.age}歳・${rx.sex}）</dd></div>
-          <div class="rx-row"><dt>備考</dt><dd>${escapeHtml(rx.note)}</dd></div>
+          <div class="rx-row"><dt>患者氏名</dt><dd>${escapeHtml(rx.patient.name)}</dd></div>
+          <div class="rx-row"><dt>生年月日</dt><dd>${escapeHtml(rx.patient.birthDate)}</dd></div>
+          <div class="rx-row"><dt>保険番号</dt><dd>${escapeHtml(rx.patient.insuranceNo)}</dd></div>
+          <div class="rx-row"><dt>診療科</dt><dd>${escapeHtml(rx.department)}</dd></div>
         </dl>
         <ul class="rx-list">
-          ${rx.drugs.map((drug, index) => `
+          ${rx.items.map(item => `
             <li>
-              <span class="rp-label">Rp.${index + 1}</span>
-              <strong>${escapeHtml(drug.name)}</strong><br>
-              ${escapeHtml(drug.displayQuantity)}
+              <span class="rp-label">Rp.${item.number}</span><span class="type-badge">${typeLabel(item.type)}</span>
+              <span class="rx-list-line">${escapeHtml(itemDisplayText(item))}</span>
             </li>
           `).join('')}
         </ul>
-        <div class="rx-note">入力形式：薬品名 用量 用法 日数・回数。例「薬品名 1錠 分1 朝食後 28日分」</div>
+        <div class="rx-note">${escapeHtml(rx.note)}</div>
       </div>
     `;
   }
 
-  function updateDrugCandidates() {
-    if (!els.answerInput || els.answerInput.disabled || state.composing) return;
-    const lineInfo = getCurrentDrugInputInfo();
-    if (!lineInfo || countSearchChars(lineInfo.query) < 3) {
+  function renderInputForm() {
+    clearPatientInputs();
+    els.medInputRows.innerHTML = state.currentRx.items.map((item, index) => renderMedInputRow(item, index)).join('');
+    bindDynamicInputEvents();
+  }
+
+  function renderMedInputRow(item, index) {
+    const fieldsHtml = item.fields.map((field, fieldIndex) => {
+      const nextField = item.fields[fieldIndex + 1];
+      const inputHtml = `<input class="entry-input med-field ${field.key === 'name' ? 'drug-name-input' : ''}" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" data-row="${index}" data-field="${escapeHtml(field.key)}" placeholder="${escapeHtml(field.label)}" />`;
+      const buttonHtml = nextField ? `<button class="move-button" type="button" data-move-row="${index}" data-move-field="${escapeHtml(nextField.key)}">${moveButtonLabel(nextField)}</button>` : '';
+      return `
+        <label>
+          ${escapeHtml(field.label)}
+          <div class="${buttonHtml ? 'field-with-button' : ''}">
+            ${inputHtml}
+            ${buttonHtml}
+          </div>
+        </label>
+      `;
+    }).join('');
+
+    return `
+      <div class="med-input-row" data-row-wrap="${index}">
+        <div class="med-row-head">
+          <span>Rp.${item.number}</span>
+          <span class="type-badge">${typeLabel(item.type)}</span>
+        </div>
+        <div class="med-input-grid ${item.type}">
+          ${fieldsHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  function bindDynamicInputEvents() {
+    [els.patientNameInput, els.birthDateInput, els.insuranceNoInput].forEach((input, index, list) => {
+      input.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' || event.isComposing) return;
+        event.preventDefault();
+        const next = list[index + 1] || els.medInputRows.querySelector('input');
+        next?.focus();
+      });
+    });
+
+    els.medInputRows.querySelectorAll('input').forEach((input) => {
+      input.addEventListener('compositionstart', () => { state.composing = true; });
+      input.addEventListener('compositionend', () => {
+        state.composing = false;
+        if (input.classList.contains('drug-name-input')) updateDrugCandidates(input);
+      });
+      input.addEventListener('focus', () => {
+        if (input.classList.contains('drug-name-input')) updateDrugCandidates(input);
+        else hideDrugCandidates();
+      });
+      input.addEventListener('input', () => {
+        if (input.classList.contains('drug-name-input')) updateDrugCandidates(input);
+      });
+      input.addEventListener('keydown', handleMedFieldKeydown);
+    });
+
+    els.medInputRows.querySelectorAll('[data-move-row]').forEach((button) => {
+      button.addEventListener('click', () => focusField(Number(button.dataset.moveRow), button.dataset.moveField));
+    });
+  }
+
+  function handleMedFieldKeydown(event) {
+    const input = event.currentTarget;
+    if (input.classList.contains('drug-name-input') && handleCandidateKeys(event, input)) return;
+    if (event.key === 'Enter' && !event.isComposing && !state.composing) {
+      event.preventDefault();
+      const row = Number(input.dataset.row);
+      const next = getNextFieldKey(row, input.dataset.field);
+      if (next) focusField(row, next);
+      else focusNextRowOrCheck(row);
+    }
+  }
+
+  function handleCandidateKeys(event, input) {
+    if (state.composing || event.isComposing) return false;
+    if (els.candidateBox.classList.contains('hidden')) return false;
+    if (!state.candidates.length) return false;
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      state.candidateIndex = (state.candidateIndex + 1) % state.candidates.length;
+      renderDrugCandidates(input);
+      return true;
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      state.candidateIndex = (state.candidateIndex - 1 + state.candidates.length) % state.candidates.length;
+      renderDrugCandidates(input);
+      return true;
+    }
+    if (event.key === 'Enter' || event.key === 'Tab') {
+      event.preventDefault();
+      chooseDrugCandidate(state.candidates[state.candidateIndex], input);
+      return true;
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      hideDrugCandidates();
+      return true;
+    }
+    return false;
+  }
+
+  function updateDrugCandidates(input) {
+    if (!input || state.composing) return;
+    state.activeDrugInput = input;
+    const query = input.value;
+    if (countSearchChars(query) < 3) {
       hideDrugCandidates();
       return;
     }
-
-    const normalizedQuery = normalizeSearchText(lineInfo.query);
-    const matches = DRUG_MASTER
+    const normalized = normalizeSearchText(query);
+    state.candidates = DRUG_MASTER
       .map((drug) => {
-        const nameIndex = drug.searchName.indexOf(normalizedQuery);
-        const readingIndex = drug.searchReading.indexOf(normalizedQuery);
-        const index = nameIndex >= 0 ? nameIndex : readingIndex;
-        if (index < 0) return null;
-        const starts = drug.searchName.startsWith(normalizedQuery) || drug.searchReading.startsWith(normalizedQuery);
-        return { ...drug, index, starts };
+        const nameHit = drug.searchName.includes(normalized);
+        const readingHit = drug.searchReading.includes(normalized);
+        const starts = drug.searchName.startsWith(normalized) || drug.searchReading.startsWith(normalized);
+        return { ...drug, score: starts ? 2 : (nameHit || readingHit ? 1 : 0) };
       })
-      .filter(Boolean)
-      .sort((a, b) => Number(b.starts) - Number(a.starts) || a.index - b.index || a.name.length - b.name.length)
+      .filter(drug => drug.score > 0)
+      .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'ja'))
       .slice(0, 8);
+    state.candidateIndex = 0;
+    renderDrugCandidates(input);
+  }
 
-    if (!matches.length) {
+  function renderDrugCandidates(input = state.activeDrugInput) {
+    if (!state.candidates.length || !input) {
       hideDrugCandidates();
       return;
     }
-
-    state.candidates = matches;
-    state.candidateIndex = Math.min(state.candidateIndex, matches.length - 1);
-    renderDrugCandidates(lineInfo);
-  }
-
-  function getCurrentDrugInputInfo() {
-    const input = els.answerInput;
-    const cursor = input.selectionStart ?? input.value.length;
-    const value = input.value;
-    const lineStart = value.lastIndexOf('\n', Math.max(0, cursor - 1)) + 1;
-    const lineEndIndex = value.indexOf('\n', cursor);
-    const lineEnd = lineEndIndex === -1 ? value.length : lineEndIndex;
-    const beforeCursor = value.slice(lineStart, cursor);
-    const whitespaceMatch = beforeCursor.match(/[\s　]/);
-
-    // 薬品名部分を確定して用量・用法を入力しているときは、候補を出さない
-    if (whitespaceMatch) return null;
-
-    const query = beforeCursor.trim();
-    if (!query) return null;
-    return { lineStart, lineEnd, cursor, query };
-  }
-
-  function renderDrugCandidates(lineInfo) {
+    els.candidateBox.classList.remove('hidden');
     els.candidateList.innerHTML = state.candidates.map((drug, index) => `
       <button type="button" class="candidate-item ${index === state.candidateIndex ? 'active' : ''}" data-index="${index}">
         <strong>${escapeHtml(drug.name)}</strong>
         <span>${escapeHtml(drug.department)} / ${escapeHtml(drug.theme)}</span>
       </button>
     `).join('');
-
     els.candidateList.querySelectorAll('.candidate-item').forEach((button) => {
-      button.addEventListener('pointerdown', (event) => {
-        event.preventDefault();
-        chooseDrugCandidate(Number(button.dataset.index || 0));
-      });
+      button.addEventListener('mousedown', (event) => event.preventDefault());
+      button.addEventListener('click', () => chooseDrugCandidate(state.candidates[Number(button.dataset.index)], input));
     });
-
-    const rect = els.answerInput.getBoundingClientRect();
-    els.candidateBox.style.setProperty('--candidate-left', `${Math.max(12, rect.left)}px`);
-    els.candidateBox.classList.remove('hidden');
-    els.candidateBox.dataset.query = lineInfo.query;
   }
 
-  function handleCandidateKeys(event) {
-    if (els.candidateBox.classList.contains('hidden') || !state.candidates.length) return;
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      state.candidateIndex = (state.candidateIndex + 1) % state.candidates.length;
-      renderDrugCandidates(getCurrentDrugInputInfo() || { query: '' });
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      state.candidateIndex = (state.candidateIndex - 1 + state.candidates.length) % state.candidates.length;
-      renderDrugCandidates(getCurrentDrugInputInfo() || { query: '' });
-    } else if (event.key === 'Enter' || event.key === 'Tab') {
-      event.preventDefault();
-      chooseDrugCandidate(state.candidateIndex);
-    } else if (event.key === 'Escape') {
-      event.preventDefault();
-      hideDrugCandidates();
-    }
-  }
-
-  function chooseDrugCandidate(index) {
-    const drug = state.candidates[index];
-    const lineInfo = getCurrentDrugInputInfo();
-    if (!drug || !lineInfo) return;
-
-    const input = els.answerInput;
-    const before = input.value.slice(0, lineInfo.lineStart);
-    const after = input.value.slice(lineInfo.cursor);
-    const insert = `${drug.name} `;
-    input.value = before + insert + after;
-    const pos = before.length + insert.length;
-    input.focus();
-    input.setSelectionRange(pos, pos);
+  function chooseDrugCandidate(drug, input = state.activeDrugInput) {
+    if (!drug || !input) return;
+    input.value = drug.name;
     hideDrugCandidates();
+    input.focus();
+    const row = Number(input.dataset.row);
+    const next = getNextFieldKey(row, 'name');
+    if (next) focusField(row, next);
   }
 
   function hideDrugCandidates() {
+    els.candidateBox.classList.add('hidden');
+    els.candidateList.innerHTML = '';
     state.candidates = [];
     state.candidateIndex = 0;
-    if (els.candidateBox) {
-      els.candidateBox.classList.add('hidden');
-      els.candidateBox.dataset.query = '';
-    }
-    if (els.candidateList) els.candidateList.innerHTML = '';
+  }
+
+  function getNextFieldKey(rowIndex, currentKey) {
+    const item = state.currentRx.items[rowIndex];
+    const currentIndex = item.fields.findIndex(field => field.key === currentKey);
+    return item.fields[currentIndex + 1]?.key || null;
+  }
+
+  function focusField(rowIndex, fieldKey) {
+    const target = els.medInputRows.querySelector(`[data-row="${rowIndex}"][data-field="${cssEscape(fieldKey)}"]`);
+    target?.focus();
+    target?.select?.();
+  }
+
+  function focusNextRowOrCheck(rowIndex) {
+    const next = els.medInputRows.querySelector(`[data-row="${rowIndex + 1}"]`);
+    if (next) next.focus();
+    else els.checkButton.focus();
+  }
+
+  function clearPatientInputs() {
+    els.patientNameInput.value = '';
+    els.birthDateInput.value = '';
+    els.insuranceNoInput.value = '';
+  }
+
+  function clearAllInputs() {
+    clearPatientInputs();
+    els.medInputRows.querySelectorAll('input').forEach(input => { input.value = ''; });
+    hideDrugCandidates();
+    els.resultBox.classList.add('hidden');
+    els.resultBox.innerHTML = '';
+    els.patientNameInput.focus();
   }
 
   function checkCurrentPrescription() {
-    if (state.checked || !state.currentRx) return;
-    const elapsed = Math.max(1, Math.round((Date.now() - state.prescriptionStartedAt) / 1000));
-    const userLines = splitLines(els.answerInput.value);
-    const expectedLines = state.currentRx.expectedLines;
-    const comparisons = compareLines(expectedLines, userLines);
-    const accuracy = comparisons.reduce((sum, item) => sum + item.rate, 0) / Math.max(expectedLines.length, userLines.length, 1);
-    const exactCount = comparisons.filter(item => item.rate >= 1).length;
-    const targetSeconds = 18 + expectedLines.length * 14 + (state.currentRx.difficulty === 'むずかしい' ? 10 : 0);
-    const speedRatio = Math.max(0, 1 - elapsed / Math.max(1, targetSeconds * 2));
-    const speedBonus = Math.round(accuracy * 500 * speedRatio);
-    const perfectBonus = accuracy >= 1 ? 300 : 0;
-    state.streak = accuracy >= 1 ? state.streak + 1 : 0;
-    const streakBonus = state.streak >= 2 ? state.streak * 50 : 0;
-    const baseScore = Math.round(accuracy * 1000);
-    const addScore = Math.max(0, baseScore + speedBonus + perfectBonus + streakBonus);
+    if (!state.currentRx || state.checked) return;
 
-    state.score += addScore;
-    state.completed += 1;
-    state.totalAccuracy += accuracy;
-    state.totalLines += expectedLines.length;
-    state.exactLines += exactCount;
+    const result = evaluateCurrentInput();
     state.checked = true;
-    state.lastResult = { elapsed, accuracy, addScore, comparisons, speedBonus, perfectBonus, streakBonus };
+    state.completed += 1;
+    state.totalAccuracy += result.accuracy;
+    state.totalFields += result.totalFields;
+    state.exactFields += result.exactFields;
+    state.streak = result.accuracy >= 0.999 ? state.streak + 1 : 0;
 
-    hideDrugCandidates();
-    els.answerInput.disabled = true;
+    const elapsed = Math.max(1, Math.round((Date.now() - state.prescriptionStartedAt) / 1000));
+    const fieldBase = Math.round(1200 * result.accuracy);
+    const exactBonus = result.accuracy >= 0.999 ? 450 : 0;
+    const speedBonus = Math.max(0, 360 - elapsed * 6);
+    const streakBonus = state.streak >= 2 ? state.streak * 80 : 0;
+    const gained = fieldBase + exactBonus + speedBonus + streakBonus;
+    state.score += gained;
+    state.lastResult = { ...result, elapsed, gained, exactBonus, speedBonus, streakBonus };
+
+    renderResult(result, elapsed, gained, { exactBonus, speedBonus, streakBonus });
     els.checkButton.disabled = true;
-    els.nextButton.textContent = state.mode !== 'endless' && state.completed >= state.targetCount ? '結果へ' : '次の処方箋へ';
     els.nextButton.classList.remove('hidden');
-    renderResult(state.lastResult);
+    els.nextButton.textContent = state.mode !== 'endless' && state.completed >= state.targetCount ? '結果へ進む' : '次の処方箋へ';
     updateStatsUi();
   }
 
-  function compareLines(expectedLines, userLines) {
-    const max = Math.max(expectedLines.length, userLines.length);
-    const result = [];
-    for (let i = 0; i < max; i += 1) {
-      const expected = expectedLines[i] || '';
-      const user = userLines[i] || '';
-      const nExpected = normalizeForCompare(expected);
-      const nUser = normalizeForCompare(user);
-      let rate = 0;
-      if (nExpected && nUser) {
-        const distance = levenshtein(nExpected, nUser);
-        rate = Math.max(0, 1 - distance / Math.max(nExpected.length, nUser.length, 1));
-      } else if (!nExpected && !nUser) {
-        rate = 1;
-      }
-      result.push({ expected, user, rate });
-    }
-    return result;
+  function evaluateCurrentInput() {
+    const checks = [];
+    checks.push(makeCheck('患者氏名', els.patientNameInput.value, state.currentRx.patient.name));
+    checks.push(makeCheck('生年月日', els.birthDateInput.value, state.currentRx.patient.birthDate));
+    checks.push(makeCheck('保険番号', els.insuranceNoInput.value, state.currentRx.patient.insuranceNo));
+
+    state.currentRx.items.forEach((item, rowIndex) => {
+      item.fields.forEach((field) => {
+        const input = els.medInputRows.querySelector(`[data-row="${rowIndex}"][data-field="${cssEscape(field.key)}"]`);
+        checks.push(makeCheck(`Rp.${item.number} ${field.label}`, input?.value || '', field.expected));
+      });
+    });
+
+    const exactFields = checks.filter(check => check.exact).length;
+    const totalFields = checks.length;
+    const partialSum = checks.reduce((sum, check) => sum + check.score, 0);
+    return {
+      checks,
+      exactFields,
+      totalFields,
+      accuracy: totalFields ? partialSum / totalFields : 0
+    };
   }
 
-  function renderResult(result) {
-    const percent = Math.round(result.accuracy * 100);
-    const title = result.accuracy >= 1 ? '完全一致です！' : result.accuracy >= .85 ? 'ほぼ正解です' : '入力内容を確認してください';
-    els.resultBox.innerHTML = `
-      <h3>${escapeHtml(title)} +${result.addScore}点</h3>
-      <p>正確率 ${percent}% / 入力時間 ${result.elapsed}秒 / 速度ボーナス ${result.speedBonus}点 / 完全一致 ${result.perfectBonus}点 / 連続ボーナス ${result.streakBonus}点</p>
-      ${result.comparisons.map((item, index) => {
-        const markClass = item.rate >= 1 ? 'ok' : item.rate >= .85 ? 'warn' : 'ng';
-        const markText = item.rate >= 1 ? 'OK' : item.rate >= .85 ? '惜しい' : '要確認';
-        return `
-          <div class="result-line">
-            <span class="mark ${markClass}">${markText}</span>
-            <div>
-              <strong>${index + 1}. ${escapeHtml(item.user || '未入力')}</strong>
-              <div class="expected">正：${escapeHtml(item.expected || '余分な入力行です')}</div>
-            </div>
-          </div>
-        `;
-      }).join('')}
-    `;
+  function makeCheck(label, actualRaw, expectedRaw) {
+    const actual = String(actualRaw || '').trim();
+    const expected = String(expectedRaw || '').trim();
+    const actualNorm = normalizeForCompare(actual);
+    const expectedNorm = normalizeForCompare(expected);
+    const exact = actualNorm === expectedNorm;
+    let score = exact ? 1 : 0;
+    if (!exact && actualNorm && expectedNorm) {
+      const maxLength = Math.max(actualNorm.length, expectedNorm.length);
+      const distance = levenshtein(actualNorm, expectedNorm);
+      score = Math.max(0, 1 - distance / Math.max(1, maxLength));
+      if (score < 0.72) score = 0;
+    }
+    return { label, actual, expected, exact, score };
+  }
+
+  function renderResult(result, elapsed, gained, bonuses) {
+    const patientRows = result.checks.slice(0, 3);
+    const medRows = result.checks.slice(3);
     els.resultBox.classList.remove('hidden');
+    els.resultBox.innerHTML = `
+      <h3>${result.exactFields} / ${result.totalFields} 項目一致　+${gained.toLocaleString()}点</h3>
+      <div class="expected">正確率 ${Math.round(result.accuracy * 100)}% / 入力時間 ${formatTime(elapsed)} / 完全一致ボーナス ${bonuses.exactBonus} / 速度ボーナス ${bonuses.speedBonus} / 連続ボーナス ${bonuses.streakBonus}</div>
+      <div class="result-group-title">患者情報</div>
+      ${patientRows.map(renderResultLine).join('')}
+      <div class="result-group-title">処方内容</div>
+      ${medRows.map(renderResultLine).join('')}
+    `;
+  }
+
+  function renderResultLine(check) {
+    const markClass = check.exact ? 'ok' : (check.score >= 0.72 ? 'warn' : 'ng');
+    const mark = check.exact ? '○' : (check.score >= 0.72 ? '△' : '×');
+    return `
+      <div class="result-line">
+        <div class="mark ${markClass}">${mark}</div>
+        <div>
+          <strong>${escapeHtml(check.label)}</strong>
+          <div>入力：${escapeHtml(check.actual || '未入力')}</div>
+          ${check.exact ? '' : `<div class="expected">正解：${escapeHtml(check.expected)}</div>`}
+        </div>
+      </div>
+    `;
   }
 
   function finishGame() {
-    clearInterval(state.timerId);
-    if (state.completed === 0 && state.currentRx && !state.checked && els.answerInput.value.trim()) {
-      checkCurrentPrescription();
-      clearInterval(state.timerId);
+    if (!state.startedAt) return;
+    if (!state.checked && state.currentRx) {
+      const ok = window.confirm('現在の処方箋は未判定です。終了して結果を表示しますか？');
+      if (!ok) return;
     }
+    if (state.timerId) clearInterval(state.timerId);
+    state.timerId = null;
+    hideDrugCandidates();
+    els.gamePanel.classList.add('hidden');
+    els.finishPanel.classList.remove('hidden');
     const elapsed = Math.round((Date.now() - state.startedAt) / 1000);
     const averageAccuracy = state.completed ? state.totalAccuracy / state.completed : 0;
-    const lineAccuracy = state.totalLines ? state.exactLines / state.totalLines : 0;
-    const payload = buildScorePayload(elapsed, averageAccuracy, lineAccuracy);
+    const fieldAccuracy = state.totalFields ? state.exactFields / state.totalFields : 0;
+    const payload = buildScorePayload(elapsed, averageAccuracy, fieldAccuracy);
     saveLocalScore(payload);
+    renderFinal(payload);
+  }
 
-    els.gamePanel.classList.add('hidden');
-    els.setupPanel.classList.add('hidden');
-    els.rankingPanel.classList.add('hidden');
-    els.finishPanel.classList.remove('hidden');
-    els.finalScore.textContent = String(payload.score);
+  function renderFinal(payload) {
+    els.finalScore.textContent = Number(payload.score).toLocaleString();
     els.finalSummary.innerHTML = `
       <div class="summary-item"><span>モード</span><strong>${modeLabel(payload.mode)}</strong></div>
       <div class="summary-item"><span>入力枚数</span><strong>${payload.prescriptions}</strong></div>
       <div class="summary-item"><span>平均正確率</span><strong>${Math.round(payload.accuracy * 100)}%</strong></div>
       <div class="summary-item"><span>時間</span><strong>${formatTime(payload.seconds)}</strong></div>
     `;
-    els.submitStatus.textContent = getGasUrl() ? '全国ランキングへ登録できます。' : 'GAS URL未設定のため、現在は端末内ベストのみ保存しています。';
+    els.submitStatus.textContent = '全国ランキングへ登録できます。';
   }
 
-  function buildScorePayload(seconds, averageAccuracy, lineAccuracy) {
+  function buildScorePayload(seconds, averageAccuracy, fieldAccuracy) {
     return {
       name: (els.playerName.value.trim() || '名無し'),
       mode: state.mode,
       score: state.score,
       accuracy: Number(averageAccuracy.toFixed(4)),
-      lineAccuracy: Number(lineAccuracy.toFixed(4)),
+      fieldAccuracy: Number(fieldAccuracy.toFixed(4)),
+      lineAccuracy: Number(fieldAccuracy.toFixed(4)),
       seconds,
       prescriptions: state.completed,
       createdAt: new Date().toISOString(),
-      version: '1.1.0'
+      version: '1.2.0'
     };
   }
 
   async function submitScore() {
-    const gasUrl = getGasUrl();
     const elapsed = Math.round((Date.now() - state.startedAt) / 1000);
-    const payload = buildScorePayload(elapsed, state.completed ? state.totalAccuracy / state.completed : 0, state.totalLines ? state.exactLines / state.totalLines : 0);
+    const payload = buildScorePayload(elapsed, state.completed ? state.totalAccuracy / state.completed : 0, state.totalFields ? state.exactFields / state.totalFields : 0);
     saveLocalScore(payload);
-
-    if (!gasUrl) {
-      els.submitStatus.textContent = 'GAS URLが未設定です。ゲーム設定画面でGAS WebアプリURLを入力してください。端末内には保存しました。';
-      return;
-    }
 
     els.submitScoreButton.disabled = true;
     els.submitStatus.textContent = 'ランキングに送信中です...';
     try {
-      const response = await gasJsonp(gasUrl, { action: 'submit', ...payload });
+      const response = await gasJsonp(DEFAULT_GAS_URL, { action: 'submit', ...payload });
       if (response && response.ok) {
         els.submitStatus.textContent = `登録しました。現在順位：${response.rank || '-'}位`;
       } else {
         throw new Error(response?.message || '登録に失敗しました');
       }
     } catch (error) {
-      els.submitStatus.textContent = `送信できませんでした：${error.message}`;
+      els.submitStatus.textContent = `送信できませんでした：${error.message}。端末内ベストには保存済みです。`;
     } finally {
       els.submitScoreButton.disabled = false;
     }
@@ -625,17 +712,12 @@
     els.rankingPanel.classList.remove('hidden');
     els.rankingList.innerHTML = '<div class="empty">ランキングを読み込み中です...</div>';
     const mode = els.rankingMode.value;
-    const gasUrl = getGasUrl();
-    if (!gasUrl) {
-      renderRanking(getLocalScores(mode), 'local');
-      return;
-    }
     try {
-      const response = await gasJsonp(gasUrl, { action: 'ranking', mode, limit: 50 });
+      const response = await gasJsonp(DEFAULT_GAS_URL, { action: 'ranking', mode, limit: 50 });
       if (!response || !response.ok) throw new Error(response?.message || 'ランキングを取得できませんでした');
       renderRanking(response.items || [], 'gas');
     } catch (error) {
-      els.rankingList.innerHTML = `<div class="empty">GASランキングを取得できませんでした。端末内ベストを表示します。<br>${escapeHtml(error.message)}</div>`;
+      els.rankingList.innerHTML = `<div class="empty">全国ランキングを取得できませんでした。端末内ベストを表示します。<br>${escapeHtml(error.message)}</div>`;
       renderRanking(getLocalScores(mode), 'local');
     }
   }
@@ -678,6 +760,13 @@
     }
   }
 
+  function resetToSetup() {
+    els.finishPanel.classList.add('hidden');
+    els.rankingPanel.classList.add('hidden');
+    els.setupPanel.classList.remove('hidden');
+    updateStatsUi();
+  }
+
   function updateStatsUi() {
     const elapsed = state.startedAt ? Math.round((Date.now() - state.startedAt) / 1000) : 0;
     const averageAccuracy = state.completed ? state.totalAccuracy / state.completed : 1;
@@ -706,6 +795,25 @@
     return [...map.values()].sort((a, b) => a.name.localeCompare(b.name, 'ja'));
   }
 
+  function typeLabel(type) {
+    return ({ regular: '内服', external: '外用', prn: '頓服' })[type] || '内服';
+  }
+
+  function moveButtonLabel(field) {
+    if (field.key === 'totalQuantity') return '全量';
+    if (field.key === 'site') return '使用部位';
+    if (field.key === 'perDose') return '1回使用量';
+    if (field.key === 'timing') return 'タイミング';
+    if (field.key === 'timesText') return '回分';
+    return field.label;
+  }
+
+  function itemDisplayText(item) {
+    if (item.type === 'external') return `${item.name}　${item.totalQuantity}　${item.site}　${item.usage}`;
+    if (item.type === 'prn') return `${item.name}　${item.perDose}　${item.timing}　${item.timesText}`;
+    return `${item.name}　${item.amount}　${item.usage}　${item.daysText}`;
+  }
+
   function normalizeSearchText(text) {
     return String(text || '')
       .normalize('NFKC')
@@ -719,21 +827,14 @@
     return Array.from(normalizeSearchText(text)).length;
   }
 
-  function splitLines(text) {
-    return text
-      .split(/\r?\n/)
-      .map(line => line.trim())
-      .filter(Boolean);
-  }
-
   function normalizeForCompare(text) {
     return String(text || '')
       .normalize('NFKC')
       .toLowerCase()
       .replace(/[\s　]+/g, '')
       .replace(/[・･,，、。\.]/g, '')
+      .replace(/[‐―ｰー－-]/g, '')
       .replace(/錠剤/g, '錠')
-      .replace(/毎食後/g, '毎食後')
       .trim();
   }
 
@@ -784,10 +885,6 @@
     });
   }
 
-  function getGasUrl() {
-    return (els.gasUrl.value || localStorage.getItem(STORAGE_KEYS.gasUrl) || DEFAULT_GAS_URL).trim();
-  }
-
   function installPwa() {
     if (!state.deferredPrompt) return;
     state.deferredPrompt.prompt();
@@ -824,6 +921,10 @@
     return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
   }
 
+  function formatDateSlash(date) {
+    return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+  }
+
   function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
@@ -842,8 +943,13 @@
   }
 
   function cryptoRandomId() {
-    if (crypto?.randomUUID) return crypto.randomUUID();
+    if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
     return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
+
+  function cssEscape(value) {
+    if (globalThis.CSS?.escape) return globalThis.CSS.escape(String(value));
+    return String(value).replace(/[^a-zA-Z0-9_-]/g, '\\$&');
   }
 
   function escapeHtml(value) {
