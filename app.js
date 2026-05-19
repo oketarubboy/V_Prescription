@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = 'v12.0.0';
+  const APP_VERSION = 'v13.0.0';
   const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbzKs2dbznSXPyNJWY0L2Wzfed5m834wBa8FLP9paAyaSJZ6dIx-eST16D3eTVICBs2rRw/exec';
 
   const STORAGE_KEYS = {
@@ -11,6 +11,20 @@
 
   const FAMILY_NAMES = ['佐藤', '鈴木', '高橋', '田中', '伊藤', '渡辺', '山本', '中村', '小林', '加藤', '吉田', '山田', '佐々木', '山口', '松本', '井上'];
   const GIVEN_NAMES = ['太郎', '花子', '一郎', '美咲', '健太', '陽子', '誠', '優子', '翔太', '恵', '大輔', '彩', '拓也', '真由美', '直樹', '玲子'];
+
+  const GIFU_INSURANCE_MASTERS = [
+    // 岐阜県を想定した入力練習用の架空データです。実在の保険者番号ではありません。
+    { city: '岐阜市', issuerNo: '21000123', symbols: ['101', '102', '103'] },
+    { city: '大垣市', issuerNo: '21000222', symbols: ['201', '202', '203'] },
+    { city: '高山市', issuerNo: '21000321', symbols: ['301', '302', '303'] },
+    { city: '多治見市', issuerNo: '21000420', symbols: ['401', '402', '403'] },
+    { city: '関市', issuerNo: '21000529', symbols: ['501', '502', '503'] },
+    { city: '中津川市', issuerNo: '21000628', symbols: ['601', '602', '603'] },
+    { city: '美濃加茂市', issuerNo: '21000727', symbols: ['701', '702', '703'] },
+    { city: '各務原市', issuerNo: '21000826', symbols: ['801', '802', '803'] },
+    { city: '可児市', issuerNo: '21000925', symbols: ['901', '902', '903'] },
+    { city: '瑞穂市', issuerNo: '21001024', symbols: ['011', '012', '013'] }
+  ];
 
   const MED_SETS = [
     {
@@ -1559,7 +1573,9 @@
     prescriptionCard: document.querySelector('#prescriptionCard'),
     patientNameInput: document.querySelector('#patientNameInput'),
     birthDateInput: document.querySelector('#birthDateInput'),
-    insuranceNoInput: document.querySelector('#insuranceNoInput'),
+    insuranceIssuerInput: document.querySelector('#insuranceIssuerInput'),
+    insuranceSymbolInput: document.querySelector('#insuranceSymbolInput'),
+    insuranceNumberInput: document.querySelector('#insuranceNumberInput'),
     medInputRows: document.querySelector('#medInputRows'),
     candidateBox: document.querySelector('#candidateBox'),
     candidateList: document.querySelector('#candidateList'),
@@ -1631,6 +1647,9 @@
     els.installButton.addEventListener('click', installPwa);
     els.updateButton.addEventListener('click', forceUpdateApp);
     els.birthDateInput.addEventListener('input', () => formatBirthDateInput(els.birthDateInput));
+    els.insuranceIssuerInput.addEventListener('input', () => formatDigitsOnlyInput(els.insuranceIssuerInput, 8));
+    els.insuranceSymbolInput.addEventListener('input', () => formatDigitsOnlyInput(els.insuranceSymbolInput, 4));
+    els.insuranceNumberInput.addEventListener('input', () => formatDigitsOnlyInput(els.insuranceNumberInput, 8));
     window.addEventListener('resize', positionCandidateBox);
     window.addEventListener('scroll', positionCandidateBox, true);
 
@@ -1739,8 +1758,7 @@
 
   function generatePrescription() {
     const set = sample(MED_SETS);
-    const count = randomInt(2, Math.min(4, set.drugs.length));
-    const selectedDrugs = shuffle(set.drugs).slice(0, count);
+    const selectedDrugs = selectFixedDrugSet(set);
     const issueDate = new Date();
     const patient = generatePatient();
     return {
@@ -1749,20 +1767,58 @@
       department: set.department,
       theme: set.theme,
       difficulty: set.difficulty,
-      note: set.note,
+      note: `${set.note} / 薬剤数は公平性のため4種類固定です。`,
       patient,
       items: selectedDrugs.map((drug, index) => buildRxItem(drug, index + 1))
     };
+  }
+
+  function selectFixedDrugSet(preferredSet) {
+    const regulars = pickDrugTemplates('regular', 3, preferredSet);
+    const specialType = Math.random() < 0.5 ? 'prn' : 'external';
+    const special = pickDrugTemplates(specialType, 1, preferredSet);
+    return [...regulars, ...special];
+  }
+
+  function pickDrugTemplates(type, count, preferredSet) {
+    const chosen = [];
+    const addFrom = (pool) => {
+      shuffle(pool).forEach((drug) => {
+        if (chosen.length >= count) return;
+        if (!chosen.some((item) => item.name === drug.name)) chosen.push(drug);
+      });
+    };
+    addFrom((preferredSet?.drugs || []).filter((drug) => drug.type === type));
+    addFrom(allDrugTemplates(type));
+    return chosen.slice(0, count);
+  }
+
+  function allDrugTemplates(type) {
+    return MED_SETS.flatMap((set) => set.drugs.filter((drug) => drug.type === type));
   }
 
   function generatePatient() {
     const year = randomInt(1948, 2018);
     const month = randomInt(1, 12);
     const day = randomInt(1, 28);
+    const insurance = generateGifuInsurance();
     return {
       name: `${sample(FAMILY_NAMES)} ${sample(GIVEN_NAMES)}`,
       birthDate: `${year}/${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}`,
-      insuranceNo: `${randomInt(10, 99)}${randomInt(100000, 999999)}${randomInt(10, 99)}`
+      insuranceIssuerNo: insurance.issuerNo,
+      insuranceSymbol: insurance.symbol,
+      insuranceNumber: insurance.number,
+      insuranceCity: insurance.city
+    };
+  }
+
+  function generateGifuInsurance() {
+    const master = sample(GIFU_INSURANCE_MASTERS);
+    return {
+      city: master.city,
+      issuerNo: master.issuerNo,
+      symbol: sample(master.symbols),
+      number: String(randomInt(100000, 99999999)).padStart(8, '0')
     };
   }
 
@@ -1840,7 +1896,9 @@
         <dl>
           <div class="rx-row"><dt>患者氏名</dt><dd>${escapeHtml(rx.patient.name)}</dd></div>
           <div class="rx-row"><dt>生年月日</dt><dd>${escapeHtml(rx.patient.birthDate)}</dd></div>
-          <div class="rx-row"><dt>保険番号</dt><dd>${escapeHtml(rx.patient.insuranceNo)}</dd></div>
+          <div class="rx-row"><dt>保険者番号</dt><dd>${escapeHtml(rx.patient.insuranceIssuerNo)}</dd></div>
+          <div class="rx-row"><dt>記号</dt><dd>${escapeHtml(rx.patient.insuranceSymbol)}</dd></div>
+          <div class="rx-row"><dt>番号</dt><dd>${escapeHtml(rx.patient.insuranceNumber)}</dd></div>
           <div class="rx-row"><dt>診療科</dt><dd>${escapeHtml(rx.department)}</dd></div>
         </dl>
         <ul class="rx-list">
@@ -1894,7 +1952,7 @@
   }
 
   function bindDynamicInputEvents() {
-    [els.patientNameInput, els.birthDateInput, els.insuranceNoInput].forEach((input, index, list) => {
+    [els.patientNameInput, els.birthDateInput, els.insuranceIssuerInput, els.insuranceSymbolInput, els.insuranceNumberInput].forEach((input, index, list) => {
       input.addEventListener('keydown', (event) => {
         if ((event.key !== 'Enter' && event.key !== 'Tab') || event.isComposing) return;
         event.preventDefault();
@@ -2118,7 +2176,9 @@
   function clearPatientInputs() {
     els.patientNameInput.value = '';
     els.birthDateInput.value = '';
-    els.insuranceNoInput.value = '';
+    els.insuranceIssuerInput.value = '';
+    els.insuranceSymbolInput.value = '';
+    els.insuranceNumberInput.value = '';
   }
 
   function clearAllInputs() {
@@ -2144,7 +2204,7 @@
     const elapsed = Math.max(1, Math.round((Date.now() - state.prescriptionStartedAt) / 1000));
     const fieldBase = Math.round(1200 * result.accuracy);
     const exactBonus = result.accuracy >= 0.999 ? 450 : 0;
-    const speedBonus = Math.max(0, 360 - elapsed * 6);
+    const speedBonus = Math.max(0, 900 - elapsed * 8);
     const streakBonus = state.streak >= 2 ? state.streak * 80 : 0;
     const gained = fieldBase + exactBonus + speedBonus + streakBonus;
     state.score += gained;
@@ -2161,7 +2221,9 @@
     const checks = [];
     checks.push(makeCheck('患者氏名', els.patientNameInput.value, state.currentRx.patient.name));
     checks.push(makeCheck('生年月日', els.birthDateInput.value, state.currentRx.patient.birthDate));
-    checks.push(makeCheck('保険番号', els.insuranceNoInput.value, state.currentRx.patient.insuranceNo));
+    checks.push(makeCheck('保険者番号', els.insuranceIssuerInput.value, state.currentRx.patient.insuranceIssuerNo));
+    checks.push(makeCheck('記号', els.insuranceSymbolInput.value, state.currentRx.patient.insuranceSymbol));
+    checks.push(makeCheck('番号', els.insuranceNumberInput.value, state.currentRx.patient.insuranceNumber));
 
     state.currentRx.items.forEach((item, rowIndex) => {
       item.fields.forEach((field) => {
@@ -2177,6 +2239,7 @@
       checks,
       exactFields,
       totalFields,
+      patientFieldCount: 5,
       accuracy: totalFields ? partialSum / totalFields : 0
     };
   }
@@ -2198,8 +2261,9 @@
   }
 
   function renderResult(result, elapsed, gained, bonuses) {
-    const patientRows = result.checks.slice(0, 3);
-    const medRows = result.checks.slice(3);
+    const patientFieldCount = result.patientFieldCount || 5;
+    const patientRows = result.checks.slice(0, patientFieldCount);
+    const medRows = result.checks.slice(patientFieldCount);
     els.resultBox.classList.remove('hidden');
     els.resultBox.innerHTML = `
       <h3>${result.exactFields} / ${result.totalFields} 項目一致　+${gained.toLocaleString()}点</h3>
@@ -2368,6 +2432,10 @@
     if (digits.length > 4) formatted = `${digits.slice(0, 4)}/${digits.slice(4, 6)}`;
     if (digits.length > 6) formatted = `${digits.slice(0, 4)}/${digits.slice(4, 6)}/${digits.slice(6, 8)}`;
     input.value = formatted;
+  }
+
+  function formatDigitsOnlyInput(input, maxLength) {
+    input.value = String(input.value || '').replace(/\D/g, '').slice(0, maxLength);
   }
 
   function quantityInputText(value) {
