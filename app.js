@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = 'v8.0.0';
+  const APP_VERSION = 'v9.0.0';
   const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbzKs2dbznSXPyNJWY0L2Wzfed5m834wBa8FLP9paAyaSJZ6dIx-eST16D3eTVICBs2rRw/exec';
 
   const STORAGE_KEYS = {
@@ -119,6 +119,8 @@
 
   const DRUG_MASTER = buildDrugMaster();
   const USAGE_MASTER = buildUsageMaster();
+  const SITE_MASTER = buildSiteMaster();
+  const DAILY_COUNT_MASTER = buildDailyCountMaster();
 
   const els = {
     setupPanel: document.querySelector('#setupPanel'),
@@ -450,6 +452,8 @@
       const classNames = ['entry-input', 'med-field'];
       if (field.key === 'name') classNames.push('drug-name-input', 'ime-kana-input');
       if (field.key === 'usage' || field.key === 'timing') classNames.push('usage-input');
+      if (field.key === 'site') classNames.push('site-input');
+      if (field.key === 'usageDailyCount') classNames.push('daily-count-input');
       if (isNumericOnlyField(field.key)) classNames.push('ime-number-input');
       const attrs = fieldInputAttributes(field);
       const inputHtml = `<input class="${classNames.join(' ')}" type="text" ${attrs} data-row="${index}" data-field="${escapeHtml(field.key)}" placeholder="${escapeHtml(inputPlaceholder(field))}" />`;
@@ -548,7 +552,15 @@
       return;
     }
     if (input.classList.contains('usage-input')) {
-      updateUsageCandidates(input);
+      updateTextCandidates(input, USAGE_MASTER, 'usage');
+      return;
+    }
+    if (input.classList.contains('site-input')) {
+      updateTextCandidates(input, SITE_MASTER, 'site');
+      return;
+    }
+    if (input.classList.contains('daily-count-input')) {
+      updateTextCandidates(input, DAILY_COUNT_MASTER, 'dailyCount');
       return;
     }
     hideCandidates();
@@ -580,20 +592,25 @@
     renderCandidates(input);
   }
 
-  function updateUsageCandidates(input) {
+  function updateTextCandidates(input, master, type) {
     state.activeCandidateInput = input;
-    state.activeCandidateType = 'usage';
+    state.activeCandidateType = type;
     const query = input.value;
-    if (countSearchChars(query) < 1) {
+    if (countSearchChars(query) < 1 && normalizeRomajiQuery(query).length < 1) {
       hideCandidates();
       return;
     }
     const normalized = normalizeSearchText(query);
-    state.candidates = USAGE_MASTER
-      .map((usage) => {
-        const hit = usage.searchText.includes(normalized);
-        const starts = usage.searchText.startsWith(normalized);
-        return { ...usage, value: usage.text, name: usage.text, sub: usage.kind, score: starts ? 2 : (hit ? 1 : 0) };
+    const romajiQuery = normalizeRomajiQuery(query);
+    state.candidates = master
+      .map((item) => {
+        const textHit = normalized && item.searchText.includes(normalized);
+        const textStarts = normalized && item.searchText.startsWith(normalized);
+        const romajiHit = romajiQuery && item.searchRomaji.some((text) => text.includes(romajiQuery));
+        const romajiStarts = romajiQuery && item.searchRomaji.some((text) => text.startsWith(romajiQuery));
+        const numericHit = item.aliases.some((alias) => alias === normalized || alias === romajiQuery);
+        const score = textStarts || romajiStarts || numericHit ? 3 : (textHit ? 2 : (romajiHit ? 1 : 0));
+        return { ...item, value: item.text, name: item.text, sub: item.kind, score };
       })
       .filter(item => item.score > 0)
       .sort((a, b) => b.score - a.score || a.text.localeCompare(b.text, 'ja'))
@@ -655,7 +672,7 @@
   }
 
   function isAutocompleteInput(input) {
-    return input?.classList?.contains('drug-name-input') || input?.classList?.contains('usage-input');
+    return input?.classList?.contains('drug-name-input') || input?.classList?.contains('usage-input') || input?.classList?.contains('site-input') || input?.classList?.contains('daily-count-input');
   }
 
   function moveToNextField(input) {
@@ -1005,11 +1022,8 @@
 
   function buildUsageMaster() {
     const map = new Map();
-    const add = (text, kind) => {
-      if (!text || map.has(text)) return;
-      map.set(text, { text, kind, searchText: normalizeSearchText(text) });
-    };
-    ['分1 朝食後', '分1 朝食前', '分1 夕食後', '分2 朝夕食後', '分2 朝食後・夕食後', '分3 毎食後', '分3 毎食前', '1日1回', '1日2回', '疼痛時', '発熱時'].forEach(text => add(text, '標準候補'));
+    const add = (text, kind) => addTextMasterItem(map, text, kind);
+    ['分1 朝食後', '分1 朝食前', '分1 夕食後', '分2 朝夕食後', '分2 朝食後・夕食後', '分3 毎食後', '分3 毎食前', '1日1回', '1日2回', '疼痛時', '発熱時', '頭痛時', '不眠時', '便秘時', '悪心時'].forEach(text => add(text, '標準候補'));
     MED_SETS.forEach((set) => {
       set.drugs.forEach((drug) => {
         (drug.usages || []).forEach(text => add(text, `${set.department} / ${set.theme}`));
@@ -1017,6 +1031,37 @@
       });
     });
     return [...map.values()].sort((a, b) => a.text.localeCompare(b.text, 'ja'));
+  }
+
+  function buildSiteMaster() {
+    const map = new Map();
+    const add = (text, kind) => addTextMasterItem(map, text, kind);
+    ['患部', '胸部', '背部', '腰部', '右肩', '左肩', '右膝', '左膝', '右肘', '左肘', '顔', '手', '足'].forEach(text => add(text, '使用部位'));
+    MED_SETS.forEach((set) => {
+      set.drugs.forEach((drug) => (drug.sites || []).forEach(text => add(text, `${set.department} / ${set.theme}`)));
+    });
+    return [...map.values()].sort((a, b) => a.text.localeCompare(b.text, 'ja'));
+  }
+
+  function buildDailyCountMaster() {
+    return [1, 2, 3, 4].map((count) => ({
+      text: String(count),
+      kind: `1日${count}回`,
+      searchText: String(count),
+      searchRomaji: [String(count)],
+      aliases: [String(count)]
+    }));
+  }
+
+  function addTextMasterItem(map, text, kind) {
+    if (!text || map.has(text)) return;
+    map.set(text, {
+      text,
+      kind,
+      searchText: normalizeSearchText(text),
+      searchRomaji: buildTextRomajiSearchTexts(text),
+      aliases: buildTextAliases(text)
+    });
   }
 
   function typeLabel(type) {
@@ -1028,6 +1073,28 @@
     if (item.type === 'external') return `${item.name}　${item.totalQuantity}　${item.site}　${item.usage}`;
     if (item.type === 'prn') return `${item.name}　${item.perDose}　${item.timing}　${item.timesText}`;
     return `${item.name}　${item.amount}　${item.usage}　${item.daysText}`;
+  }
+
+
+  function buildTextRomajiSearchTexts(text) {
+    const sourceTexts = [text, stripNonKana(text)].filter(Boolean);
+    const set = new Set();
+    sourceTexts.forEach((source) => {
+      kanaToRomajiVariants(source).forEach((variant) => {
+        const normalized = normalizeRomajiQuery(variant);
+        if (normalized) set.add(normalized);
+      });
+    });
+    return [...set];
+  }
+
+  function buildTextAliases(text) {
+    const aliases = new Set();
+    const normalized = normalizeSearchText(text);
+    const countMatch = String(text || '').match(/1日([0-9０-９]+)回/);
+    if (countMatch) aliases.add(normalizeSearchText(countMatch[1]));
+    if (normalized) aliases.add(normalized);
+    return [...aliases].map(normalizeRomajiQuery).filter(Boolean);
   }
 
   function buildDrugRomajiSearchTexts(name, reading) {

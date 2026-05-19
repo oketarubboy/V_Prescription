@@ -1,11 +1,14 @@
-const APP_VERSION = 'v8.0.0';
-const CACHE_NAME = 'rx-input-challenge-v8';
+const APP_VERSION = 'v9.0.0';
+const CACHE_NAME = 'rx-input-challenge-v9';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './app.js',
   './manifest.webmanifest',
+  './VERSION.txt',
+  './medicine-master-current.csv',
+  './medicine-master-current.md',
   './assets/icon-192.png',
   './assets/icon-512.png'
 ];

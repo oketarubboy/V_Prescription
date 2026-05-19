@@ -2,7 +2,7 @@
 
 ## バージョン情報
 
-- 現在のバージョン：v8.0.0
+- 現在のバージョン：v9.0.0
 - 画面右上とフッターにバージョン情報を表示します。
 - 「最新版に更新」ボタンでService Workerキャッシュを削除し、GitHub Pages上の最新ファイルを再取得します。
 
@@ -36,6 +36,9 @@ prescription-input-pwa/
 ├─ app.js
 ├─ sw.js
 ├─ manifest.webmanifest
+├─ VERSION.txt
+├─ medicine-master-current.csv
+├─ medicine-master-current.md
 ├─ assets/
 │  ├─ icon-192.png
 │  └─ icon-512.png
@@ -84,9 +87,59 @@ GAS側を差し替える場合のみ、`app.js` の `DEFAULT_GAS_URL` を変更�
 実在の患者情報や実処方は登録しないでください。
 
 
-## v8.0.0 の主な変更
+## v9.0.0 の主な変更
 
-- 医薬品名候補検索にローマ字入力対応を追加しました。
-- `ti / chi`、`tu / tsu`、`si / shi`、`zi / ji`、`hu / fu` など複数の入力方法に対応しました。
-- `amu` で「アムロジピン」、`rok` で「ロキソプロフェン」、`turo` または `tsuro` で「ツロブテロール」などを候補表示できます。
-- 候補表示を入力欄直下のドロップダウンに固定しやすい構造へ修正しました。
+- 頓服薬の服用・使用タイミングをローマ字入力候補に対応しました。
+- 外用薬の使用部位をローマ字入力候補に対応しました。
+- 外用貼付剤の `1日1回` は、`1` だけ入力すると `1日1回` の候補が出るようにしました。
+- 医薬品候補・用法候補・使用部位候補・タイミング候補を入力欄直下のドロップダウンに表示します。
+- 現在の医薬品一覧として `medicine-master-current.csv` と `medicine-master-current.md` を追加しました。
+
+## 医薬品を追加する手順
+
+医薬品は `app.js` の `MED_SETS` に登録します。
+
+### 内服薬を追加する例
+
+```javascript
+{ type: 'regular', name: '医薬品名', reading: 'イヤクヒンメイ', amounts: ['1錠'], usages: ['分1 朝食後'], days: [14, 28] }
+```
+
+- `type: 'regular'` は内服薬です。
+- `name` は画面に表示される医薬品名です。
+- `reading` はローマ字検索用の読みです。カタカナで登録します。
+- `amounts` は1日量候補です。入力時は `1錠` なら `1` だけ入力します。
+- `usages` は用法候補です。
+- `days` は日数候補です。入力時は `14日分` なら `14` だけ入力します。
+
+### 外用薬を追加する例
+
+```javascript
+{ type: 'external', name: '医薬品名', reading: 'イヤクヒンメイ', totals: ['14枚'], sites: ['患部'], usages: ['1日1回'] }
+```
+
+- `type: 'external'` は外用薬です。
+- `totals` は処方された全量候補です。
+- `sites` は使用部位候補です。ローマ字入力でも候補表示されます。
+- 貼付剤で `1日1回` の場合、入力欄では `1` だけ入力すれば正解になります。
+
+### 頓服薬を追加する例
+
+```javascript
+{ type: 'prn', name: '医薬品名', reading: 'イヤクヒンメイ', perDoses: ['1錠'], timings: ['疼痛時'], times: [10] }
+```
+
+- `type: 'prn'` は頓服薬です。
+- `perDoses` は1回使用量です。`1錠` なら `1` だけ入力します。
+- `timings` は服用・使用タイミングです。ローマ字入力でも候補表示されます。
+- `times` は回分です。`10回分` なら `10` だけ入力します。
+
+### 追加後に確認すること
+
+1. `APP_VERSION` を上げます。例：`v9.0.0` → `v10.0.0`
+2. `index.html` のバージョン表示を上げます。
+3. `sw.js` の `APP_VERSION` と `CACHE_NAME` を上げます。
+4. GitHub Pagesへ上書きアップロードします。
+5. 画面右上の「最新版に更新」を押します。
+
+現在登録されている医薬品は、同梱の `medicine-master-current.csv` または `medicine-master-current.md` で確認できます。

@@ -1,7 +1,9 @@
-処方箋入力チャレンジ PWA
-Version: v8.0.0
-更新内容:
-- 医薬品名候補検索にローマ字入力対応を追加
-- ti/chi、tu/tsu、si/shi、zi/ji、hu/fu など複数のローマ字入力方法に対応
-- 医薬品名候補を入力欄直下に出すため、入力欄専用ラッパー内のドロップダウン表示へ修正
-- Service Workerキャッシュ名を rx-input-challenge-v8 に更新
+処方箋入力チャレンジ
+Version: v9.0.0
+
+変更内容:
+- 頓服薬の服用・使用タイミングをローマ字入力候補に対応
+- 外用薬の使用部位をローマ字入力候補に対応
+- 外用貼付剤の「1日●回」は●だけ入力して候補表示・判定可能に変更
+- 現在の医薬品一覧ファイル medicine-master-current.csv / .md を追加
+- Service Workerキャッシュ名を rx-input-challenge-v9 に更新
