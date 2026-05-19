@@ -139,6 +139,9 @@ input, select {
   outline: none;
 }
 input:focus, select:focus { border-color: var(--primary-2); box-shadow: 0 0 0 4px rgba(20,184,166,.12); }
+input[data-input-kind="number"] { ime-mode: disabled; }
+input[data-input-kind="kana"] { ime-mode: active; }
+
 .notice {
   border: 1px dashed #99d8d2;
   border-radius: 16px;

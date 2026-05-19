@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = 'v5.0.0';
+  const APP_VERSION = 'v6.0.0';
   const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbzKs2dbznSXPyNJWY0L2Wzfed5m834wBa8FLP9paAyaSJZ6dIx-eST16D3eTVICBs2rRw/exec';
 
   const STORAGE_KEYS = {
@@ -315,6 +315,9 @@
       const totalQuantity = sample(template.totals);
       const site = sample(template.sites);
       const usage = sample(template.usages);
+      const usageField = isPatchExternal(template)
+        ? { key: 'usageDailyCount', label: '1日回数', expected: dailyCountInputText(usage) }
+        : { key: 'usage', label: '用法', expected: usage };
       return {
         ...base,
         totalQuantity,
@@ -324,7 +327,7 @@
           { key: 'name', label: '薬品名', expected: template.name },
           { key: 'totalQuantity', label: '処方された全量', expected: quantityInputText(totalQuantity) },
           { key: 'site', label: '使用部位', expected: site },
-          { key: 'usage', label: '用法', expected: usage }
+          usageField
         ]
       };
     }
@@ -407,8 +410,8 @@
       const classNames = ['entry-input', 'med-field'];
       if (field.key === 'name') classNames.push('drug-name-input');
       if (field.key === 'usage' || field.key === 'timing') classNames.push('usage-input');
-      const inputMode = isNumericOnlyField(field.key) ? ' inputmode="decimal"' : '';
-      const inputHtml = `<input class="${classNames.join(' ')}" type="text"${inputMode} autocomplete="off" autocapitalize="off" spellcheck="false" data-row="${index}" data-field="${escapeHtml(field.key)}" placeholder="${escapeHtml(inputPlaceholder(field))}" />`;
+      const attrs = fieldInputAttributes(field);
+      const inputHtml = `<input class="${classNames.join(' ')}" type="text" ${attrs} data-row="${index}" data-field="${escapeHtml(field.key)}" placeholder="${escapeHtml(inputPlaceholder(field))}" />`;
       return `
         <label>
           ${escapeHtml(field.label)}
@@ -892,11 +895,39 @@
     return match ? match[1] : normalized;
   }
 
+  function dailyCountInputText(value) {
+    const normalized = String(value || '').normalize('NFKC').trim();
+    const match = normalized.match(/1日([0-9]+(?:\.[0-9]+)?)回/);
+    return match ? match[1] : quantityInputText(normalized);
+  }
+
+  function isPatchExternal(template) {
+    return /テープ|パップ|貼付|プラスター/i.test(String(template?.name || ''));
+  }
+
   function isNumericOnlyField(key) {
-    return ['amount', 'perDose', 'totalQuantity', 'daysText', 'timesText'].includes(key);
+    return ['amount', 'perDose', 'totalQuantity', 'daysText', 'timesText', 'usageDailyCount'].includes(key);
+  }
+
+  function isIntegerOnlyField(key) {
+    return ['daysText', 'timesText', 'usageDailyCount'].includes(key);
+  }
+
+  function fieldInputAttributes(field) {
+    if (isIntegerOnlyField(field.key)) {
+      return 'inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocapitalize="off" spellcheck="false" data-input-kind="number"';
+    }
+    if (isNumericOnlyField(field.key)) {
+      return 'inputmode="decimal" autocomplete="off" autocapitalize="off" spellcheck="false" data-input-kind="number"';
+    }
+    if (field.key === 'name') {
+      return 'inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" lang="ja" data-input-kind="kana"';
+    }
+    return 'inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" lang="ja"';
   }
 
   function inputPlaceholder(field) {
+    if (field.key === 'usageDailyCount') return '例：1日1回 → 1';
     if (isNumericOnlyField(field.key)) return `${field.label}（数字のみ）`;
     if (field.key === 'usage') return '例：朝 / 分1 / 毎食後';
     if (field.key === 'timing') return '例：疼痛時 / 発熱時';

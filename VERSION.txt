@@ -1,6 +1,6 @@
 処方箋入力チャレンジ PWA
-Version: v5.0.0
+Version: v6.0.0
 更新内容:
-- 画面右上とフッターにバージョン情報を表示
-- 最新版に更新ボタンを追加
-- Service Workerキャッシュ名を rx-input-challenge-v5 に更新
+- 氏名・薬品名は日本語入力向け、数字欄は半角数字入力向けの入力属性を追加
+- 貼付剤の外用薬は「1日●回」の●だけ入力する判定に変更
+- Service Workerキャッシュ名を rx-input-challenge-v6 に更新
