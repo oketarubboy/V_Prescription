@@ -250,6 +250,13 @@ input[data-input-kind="kana"] { ime-mode: active; }
   margin-bottom: 14px;
 }
 .entry-input { height: 46px; line-height: 1.2; font-size: 16px; }
+.input-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+.input-wrap > input { width: 100%; }
+
 .ime-kana-input {
   ime-mode: active;
 }
@@ -288,6 +295,7 @@ input[data-input-kind="kana"] { ime-mode: active; }
   top: calc(100% + 4px);
   right: 0;
   z-index: 10000;
+  min-width: 100%;
   border: 1.8px solid #0f766e;
   border-radius: 12px;
   overflow: hidden;

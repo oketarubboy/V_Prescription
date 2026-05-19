@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = 'v7.0.0';
+  const APP_VERSION = 'v8.0.0';
   const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbzKs2dbznSXPyNJWY0L2Wzfed5m834wBa8FLP9paAyaSJZ6dIx-eST16D3eTVICBs2rRw/exec';
 
   const STORAGE_KEYS = {
@@ -16,66 +16,106 @@
     {
       department: '内科', theme: '血圧管理', difficulty: '標準', note: '継続処方。患者情報、日数、用法を確認して入力。',
       drugs: [
-        { type: 'regular', name: 'アムロジピンOD錠5mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [14, 28, 30] },
-        { type: 'regular', name: 'テルミサルタン錠40mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [14, 28, 30] },
-        { type: 'regular', name: 'ロスバスタチン錠2.5mg', amounts: ['1錠'], usages: ['分1 夕食後'], days: [14, 28, 30] },
-        { type: 'regular', name: '酸化マグネシウム錠330mg', amounts: ['3錠', '6錠'], usages: ['分3 毎食後'], days: [14, 28] }
+        { type: 'regular', name: 'アムロジピンOD錠5mg', reading: 'アムロジピンODジョウ5mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [14, 28, 30] },
+        { type: 'regular', name: 'テルミサルタン錠40mg', reading: 'テルミサルタンジョウ40mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [14, 28, 30] },
+        { type: 'regular', name: 'ロスバスタチン錠2.5mg', reading: 'ロスバスタチンジョウ2.5mg', amounts: ['1錠'], usages: ['分1 夕食後'], days: [14, 28, 30] },
+        { type: 'regular', name: '酸化マグネシウム錠330mg', reading: 'サンカマグネシウムジョウ330mg', amounts: ['3錠', '6錠'], usages: ['分3 毎食後'], days: [14, 28] }
       ]
     },
     {
       department: '整形外科', theme: '疼痛管理', difficulty: 'やさしい', note: '内服薬と頓服の入力順を区別して入力。',
       drugs: [
-        { type: 'regular', name: 'ロキソプロフェンNa錠60mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7, 14] },
-        { type: 'regular', name: 'レバミピド錠100mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7, 14] },
-        { type: 'prn', name: 'ロキソプロフェンNa錠60mg', perDoses: ['1錠'], timings: ['疼痛時'], times: [5, 10, 15] },
-        { type: 'external', name: 'ケトプロフェンテープ40mg', totals: ['21枚', '35枚'], sites: ['患部'], usages: ['1日1回'] }
+        { type: 'regular', name: 'ロキソプロフェンNa錠60mg', reading: 'ロキソプロフェンNaジョウ60mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7, 14] },
+        { type: 'regular', name: 'レバミピド錠100mg', reading: 'レバミピドジョウ100mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7, 14] },
+        { type: 'prn', name: 'ロキソプロフェンNa錠60mg', reading: 'ロキソプロフェンNaジョウ60mg', perDoses: ['1錠'], timings: ['疼痛時'], times: [5, 10, 15] },
+        { type: 'external', name: 'ケトプロフェンテープ40mg', reading: 'ケトプロフェンテープ40mg', totals: ['21枚', '35枚'], sites: ['患部'], usages: ['1日1回'] }
       ]
     },
     {
       department: '耳鼻咽喉科', theme: '感冒症状', difficulty: '標準', note: '粉薬・錠剤が混在。薬品名と用法を正確に入力。',
       drugs: [
-        { type: 'regular', name: 'カルボシステイン錠500mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7] },
-        { type: 'regular', name: 'デキストロメトルファン臭化水素酸塩錠15mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7] },
-        { type: 'prn', name: 'アセトアミノフェン錠200mg', perDoses: ['2錠'], timings: ['発熱時'], times: [5, 10] },
-        { type: 'external', name: 'ツロブテロールテープ1mg', totals: ['7枚'], sites: ['胸部'], usages: ['1日1回'] }
+        { type: 'regular', name: 'カルボシステイン錠500mg', reading: 'カルボシステインジョウ500mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7] },
+        { type: 'regular', name: 'デキストロメトルファン臭化水素酸塩錠15mg', reading: 'デキストロメトルファンシュウカスイソサンエンジョウ15mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7] },
+        { type: 'prn', name: 'アセトアミノフェン錠200mg', reading: 'アセトアミノフェンジョウ200mg', perDoses: ['2錠'], timings: ['発熱時'], times: [5, 10] },
+        { type: 'external', name: 'ツロブテロールテープ1mg', reading: 'ツロブテロールテープ1mg', totals: ['7枚'], sites: ['胸部'], usages: ['1日1回'] }
       ]
     },
     {
       department: '消化器内科', theme: '胃腸症状', difficulty: '標準', note: '食前・食後の違いに注意。',
       drugs: [
-        { type: 'regular', name: 'ランソプラゾールOD錠15mg', amounts: ['1錠'], usages: ['分1 朝食前'], days: [14, 28] },
-        { type: 'regular', name: 'モサプリドクエン酸塩錠5mg', amounts: ['3錠'], usages: ['分3 毎食前'], days: [7, 14] },
-        { type: 'regular', name: 'ビオフェルミン錠剤', amounts: ['3錠', '6錠'], usages: ['分3 毎食後'], days: [7, 14] }
+        { type: 'regular', name: 'ランソプラゾールOD錠15mg', reading: 'ランソプラゾールODジョウ15mg', amounts: ['1錠'], usages: ['分1 朝食前'], days: [14, 28] },
+        { type: 'regular', name: 'モサプリドクエン酸塩錠5mg', reading: 'モサプリドクエンサンエンジョウ5mg', amounts: ['3錠'], usages: ['分3 毎食前'], days: [7, 14] },
+        { type: 'regular', name: 'ビオフェルミン錠剤', reading: 'ビオフェルミンジョウザイ', amounts: ['3錠', '6錠'], usages: ['分3 毎食後'], days: [7, 14] }
       ]
     },
     {
       department: '小児科', theme: '小児処方', difficulty: 'むずかしい', note: '小児用量の単位と粉薬名を確認。',
       drugs: [
-        { type: 'regular', name: 'アスベリン散10%', amounts: ['0.6g', '0.9g'], usages: ['分3 毎食後'], days: [5, 7] },
-        { type: 'regular', name: 'ムコダインDS50%', amounts: ['1.2g', '1.5g'], usages: ['分3 毎食後'], days: [5, 7] },
-        { type: 'prn', name: 'カロナール細粒20%', perDoses: ['1.0g'], timings: ['発熱時'], times: [5, 8] },
-        { type: 'regular', name: 'ホクナリンドライシロップ0.1%', amounts: ['0.5g'], usages: ['分2 朝夕食後'], days: [5, 7] }
+        { type: 'regular', name: 'アスベリン散10%', reading: 'アスベリンサン10%', amounts: ['0.6g', '0.9g'], usages: ['分3 毎食後'], days: [5, 7] },
+        { type: 'regular', name: 'ムコダインDS50%', reading: 'ムコダインDS50%', amounts: ['1.2g', '1.5g'], usages: ['分3 毎食後'], days: [5, 7] },
+        { type: 'prn', name: 'カロナール細粒20%', reading: 'カロナールサイリュウ20%', perDoses: ['1.0g'], timings: ['発熱時'], times: [5, 8] },
+        { type: 'regular', name: 'ホクナリンドライシロップ0.1%', reading: 'ホクナリンドライシロップ0.1%', amounts: ['0.5g'], usages: ['分2 朝夕食後'], days: [5, 7] }
       ]
     },
     {
       department: '皮膚科', theme: '外用薬', difficulty: 'むずかしい', note: '外用薬は薬品名、処方された全量、使用部位、用法の順に入力。',
       drugs: [
-        { type: 'external', name: 'ヒルドイドソフト軟膏0.3%', totals: ['25g', '50g'], sites: ['患部'], usages: ['1日2回'] },
-        { type: 'external', name: 'ロコイド軟膏0.1%', totals: ['5g', '10g'], sites: ['患部'], usages: ['1日2回'] },
-        { type: 'regular', name: 'アレグラ錠60mg', amounts: ['2錠'], usages: ['分2 朝夕食後'], days: [7, 14] },
-        { type: 'external', name: 'ヘパリン類似物質ローション0.3%', totals: ['50g'], sites: ['患部'], usages: ['1日2回'] }
+        { type: 'external', name: 'ヒルドイドソフト軟膏0.3%', reading: 'ヒルドイドソフトナンコウ0.3%', totals: ['25g', '50g'], sites: ['患部'], usages: ['1日2回'] },
+        { type: 'external', name: 'ロコイド軟膏0.1%', reading: 'ロコイドナンコウ0.1%', totals: ['5g', '10g'], sites: ['患部'], usages: ['1日2回'] },
+        { type: 'regular', name: 'アレグラ錠60mg', reading: 'アレグラジョウ60mg', amounts: ['2錠'], usages: ['分2 朝夕食後'], days: [7, 14] },
+        { type: 'external', name: 'ヘパリン類似物質ローション0.3%', reading: 'ヘパリンルイジブッシツローション0.3%', totals: ['50g'], sites: ['患部'], usages: ['1日2回'] }
       ]
     },
     {
       department: '糖尿病内科', theme: '生活習慣病', difficulty: 'むずかしい', note: '長期処方。薬品名の数字まで入力。',
       drugs: [
-        { type: 'regular', name: 'メトホルミン塩酸塩錠250mg', amounts: ['2錠', '3錠'], usages: ['分2 朝夕食後', '分3 毎食後'], days: [28, 30, 56] },
-        { type: 'regular', name: 'ジャディアンス錠10mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [28, 30, 56] },
-        { type: 'regular', name: 'グリメピリド錠1mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [28, 30] },
-        { type: 'regular', name: 'ピオグリタゾン錠15mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [28, 30] }
+        { type: 'regular', name: 'メトホルミン塩酸塩錠250mg', reading: 'メトホルミンエンサンエンジョウ250mg', amounts: ['2錠', '3錠'], usages: ['分2 朝夕食後', '分3 毎食後'], days: [28, 30, 56] },
+        { type: 'regular', name: 'ジャディアンス錠10mg', reading: 'ジャディアンスジョウ10mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [28, 30, 56] },
+        { type: 'regular', name: 'グリメピリド錠1mg', reading: 'グリメピリドジョウ1mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [28, 30] },
+        { type: 'regular', name: 'ピオグリタゾン錠15mg', reading: 'ピオグリタゾンジョウ15mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [28, 30] }
       ]
     }
   ];
+
+  const ROMAJI_CHARS = {
+    'あ': ['a'], 'い': ['i'], 'う': ['u'], 'え': ['e'], 'お': ['o'],
+    'か': ['ka'], 'き': ['ki'], 'く': ['ku'], 'け': ['ke'], 'こ': ['ko'],
+    'が': ['ga'], 'ぎ': ['gi'], 'ぐ': ['gu'], 'げ': ['ge'], 'ご': ['go'],
+    'さ': ['sa'], 'し': ['shi', 'si'], 'す': ['su'], 'せ': ['se'], 'そ': ['so'],
+    'ざ': ['za'], 'じ': ['ji', 'zi'], 'ず': ['zu'], 'ぜ': ['ze'], 'ぞ': ['zo'],
+    'た': ['ta'], 'ち': ['chi', 'ti'], 'つ': ['tsu', 'tu'], 'て': ['te'], 'と': ['to'],
+    'だ': ['da'], 'ぢ': ['ji', 'di'], 'づ': ['zu', 'du'], 'で': ['de'], 'ど': ['do'],
+    'な': ['na'], 'に': ['ni'], 'ぬ': ['nu'], 'ね': ['ne'], 'の': ['no'],
+    'は': ['ha'], 'ひ': ['hi'], 'ふ': ['fu', 'hu'], 'へ': ['he'], 'ほ': ['ho'],
+    'ば': ['ba'], 'び': ['bi'], 'ぶ': ['bu'], 'べ': ['be'], 'ぼ': ['bo'],
+    'ぱ': ['pa'], 'ぴ': ['pi'], 'ぷ': ['pu'], 'ぺ': ['pe'], 'ぽ': ['po'],
+    'ま': ['ma'], 'み': ['mi'], 'む': ['mu'], 'め': ['me'], 'も': ['mo'],
+    'や': ['ya'], 'ゆ': ['yu'], 'よ': ['yo'],
+    'ら': ['ra'], 'り': ['ri'], 'る': ['ru'], 'れ': ['re'], 'ろ': ['ro'],
+    'わ': ['wa'], 'を': ['wo', 'o'], 'ん': ['n'],
+    'ぁ': ['a'], 'ぃ': ['i'], 'ぅ': ['u'], 'ぇ': ['e'], 'ぉ': ['o'],
+    'ゃ': ['ya'], 'ゅ': ['yu'], 'ょ': ['yo'], 'ゎ': ['wa'],
+    'ゔ': ['vu', 'bu']
+  };
+
+  const ROMAJI_DIGRAPHS = {
+    'きゃ': ['kya'], 'きぃ': ['kyi'], 'きゅ': ['kyu'], 'きぇ': ['kye'], 'きょ': ['kyo'],
+    'ぎゃ': ['gya'], 'ぎぃ': ['gyi'], 'ぎゅ': ['gyu'], 'ぎぇ': ['gye'], 'ぎょ': ['gyo'],
+    'しゃ': ['sha', 'sya'], 'しぃ': ['syi'], 'しゅ': ['shu', 'syu'], 'しぇ': ['she', 'sye'], 'しょ': ['sho', 'syo'],
+    'じゃ': ['ja', 'jya', 'zya'], 'じぃ': ['jyi', 'zyi'], 'じゅ': ['ju', 'jyu', 'zyu'], 'じぇ': ['je', 'jye', 'zye'], 'じょ': ['jo', 'jyo', 'zyo'],
+    'ちゃ': ['cha', 'tya', 'cya'], 'ちぃ': ['tyi', 'cyi'], 'ちゅ': ['chu', 'tyu', 'cyu'], 'ちぇ': ['che', 'tye', 'cye'], 'ちょ': ['cho', 'tyo', 'cyo'],
+    'ぢゃ': ['ja', 'dya'], 'ぢゅ': ['ju', 'dyu'], 'ぢょ': ['jo', 'dyo'],
+    'にゃ': ['nya'], 'にぃ': ['nyi'], 'にゅ': ['nyu'], 'にぇ': ['nye'], 'にょ': ['nyo'],
+    'ひゃ': ['hya'], 'ひぃ': ['hyi'], 'ひゅ': ['hyu'], 'ひぇ': ['hye'], 'ひょ': ['hyo'],
+    'びゃ': ['bya'], 'びぃ': ['byi'], 'びゅ': ['byu'], 'びぇ': ['bye'], 'びょ': ['byo'],
+    'ぴゃ': ['pya'], 'ぴぃ': ['pyi'], 'ぴゅ': ['pyu'], 'ぴぇ': ['pye'], 'ぴょ': ['pyo'],
+    'みゃ': ['mya'], 'みぃ': ['myi'], 'みゅ': ['myu'], 'みぇ': ['mye'], 'みょ': ['myo'],
+    'りゃ': ['rya'], 'りぃ': ['ryi'], 'りゅ': ['ryu'], 'りぇ': ['rye'], 'りょ': ['ryo'],
+    'ふぁ': ['fa', 'fwa'], 'ふぃ': ['fi', 'fwi'], 'ふぇ': ['fe', 'fwe'], 'ふぉ': ['fo', 'fwo'],
+    'てぃ': ['ti', 'thi'], 'てゅ': ['tyu', 'thu'], 'でぃ': ['di', 'dhi'], 'でゅ': ['dyu', 'dhu'],
+    'うぃ': ['wi'], 'うぇ': ['we'], 'うぉ': ['wo'],
+    'ゔぁ': ['va', 'ba'], 'ゔぃ': ['vi', 'bi'], 'ゔぇ': ['ve', 'be'], 'ゔぉ': ['vo', 'bo'], 'ゔゅ': ['vyu', 'byu']
+  };
 
   const DRUG_MASTER = buildDrugMaster();
   const USAGE_MASTER = buildUsageMaster();
@@ -416,7 +456,7 @@
       return `
         <label>
           ${escapeHtml(field.label)}
-          ${inputHtml}
+          <span class="input-wrap">${inputHtml}</span>
         </label>
       `;
     }).join('');
@@ -523,12 +563,15 @@
       return;
     }
     const normalized = normalizeSearchText(query);
+    const romajiQuery = normalizeRomajiQuery(query);
     state.candidates = DRUG_MASTER
       .map((drug) => {
         const nameHit = drug.searchName.includes(normalized);
         const readingHit = drug.searchReading.includes(normalized);
-        const starts = drug.searchName.startsWith(normalized) || drug.searchReading.startsWith(normalized);
-        return { ...drug, value: drug.name, sub: `${drug.department} / ${drug.theme}`, score: starts ? 2 : (nameHit || readingHit ? 1 : 0) };
+        const romajiHit = romajiQuery.length >= 3 && drug.searchRomaji.some((text) => text.includes(romajiQuery));
+        const starts = drug.searchName.startsWith(normalized) || drug.searchReading.startsWith(normalized) ||
+          (romajiQuery.length >= 3 && drug.searchRomaji.some((text) => text.startsWith(romajiQuery)));
+        return { ...drug, value: drug.name, sub: `${drug.department} / ${drug.theme}`, score: starts ? 3 : (nameHit || readingHit ? 2 : (romajiHit ? 1 : 0)) };
       })
       .filter(item => item.score > 0)
       .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'ja'))
@@ -564,7 +607,7 @@
       hideCandidates();
       return;
     }
-    const host = input.closest('label') || input.parentElement || els.medInputRows;
+    const host = input.closest('.input-wrap') || input.parentElement || els.medInputRows;
     if (els.candidateBox.parentElement !== host) {
       host.appendChild(els.candidateBox);
     }
@@ -945,12 +988,15 @@
     MED_SETS.forEach((set) => {
       set.drugs.forEach((drug) => {
         if (map.has(drug.name)) return;
+        const reading = drug.reading || drug.name;
         map.set(drug.name, {
           name: drug.name,
+          reading,
           department: set.department,
           theme: set.theme,
           searchName: normalizeSearchText(drug.name),
-          searchReading: normalizeSearchText(drug.reading || drug.name)
+          searchReading: normalizeSearchText(reading),
+          searchRomaji: buildDrugRomajiSearchTexts(drug.name, reading)
         });
       });
     });
@@ -983,6 +1029,111 @@
     if (item.type === 'prn') return `${item.name}　${item.perDose}　${item.timing}　${item.timesText}`;
     return `${item.name}　${item.amount}　${item.usage}　${item.daysText}`;
   }
+
+  function buildDrugRomajiSearchTexts(name, reading) {
+    const sourceTexts = [name, reading, stripNonKana(name), stripNonKana(reading)].filter(Boolean);
+    const set = new Set();
+    sourceTexts.forEach((text) => {
+      kanaToRomajiVariants(text).forEach((variant) => {
+        const normalized = normalizeRomajiQuery(variant);
+        if (normalized) set.add(normalized);
+      });
+    });
+    return [...set];
+  }
+
+  function stripNonKana(text) {
+    return String(text || '').replace(/[^ぁ-んァ-ンーッャュョヮヵヶヴー]/g, '');
+  }
+
+  function normalizeRomajiQuery(text) {
+    return String(text || '')
+      .normalize('NFKC')
+      .toLowerCase()
+      .replace(/[^a-z0-9.%]/g, '')
+      .trim();
+  }
+
+  function toHiraganaText(text) {
+    return String(text || '').normalize('NFKC').replace(/[ァ-ン]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0x60));
+  }
+
+  function kanaToRomajiVariants(text) {
+    const input = toHiraganaText(text);
+    let variants = [''];
+    let doubleNext = false;
+    const maxVariants = 256;
+
+    const appendAlternatives = (alts) => {
+      const next = [];
+      const safeAlts = alts && alts.length ? alts : [''];
+      variants.forEach((base) => {
+        safeAlts.forEach((alt) => {
+          const prefix = doubleNext && alt ? firstConsonantForDouble(alt) : '';
+          next.push(base + prefix + alt);
+        });
+      });
+      variants = uniqueLimited(next, maxVariants);
+      doubleNext = false;
+    };
+
+    const appendLongVowel = () => {
+      const next = [];
+      variants.forEach((base) => {
+        next.push(base);
+        const match = base.match(/[aiueo](?=[^aiueo]*$)/);
+        if (match) next.push(base + match[0]);
+      });
+      variants = uniqueLimited(next, maxVariants);
+      doubleNext = false;
+    };
+
+    for (let i = 0; i < input.length; i += 1) {
+      const char = input[i];
+      const nextChar = input[i + 1];
+      const pair = char + (nextChar || '');
+
+      if (char === 'っ') {
+        doubleNext = true;
+        continue;
+      }
+      if (char === 'ー') {
+        // 長音は、tepu / teepu のどちらでも検索できるよう、省略版と母音追加版を作る。
+        appendLongVowel();
+        continue;
+      }
+      if (ROMAJI_DIGRAPHS[pair]) {
+        appendAlternatives(ROMAJI_DIGRAPHS[pair]);
+        i += 1;
+        continue;
+      }
+      if (ROMAJI_CHARS[char]) {
+        appendAlternatives(ROMAJI_CHARS[char]);
+        continue;
+      }
+      if (/[a-z0-9.%]/i.test(char)) {
+        appendAlternatives([char.toLowerCase()]);
+        continue;
+      }
+      // 漢字や記号は読み検索では無視する。reading が設定されている薬品は reading 側で検索される。
+    }
+    return uniqueLimited(variants.map(normalizeRomajiQuery).filter(Boolean), maxVariants);
+  }
+
+  function firstConsonantForDouble(romaji) {
+    if (!romaji) return '';
+    if (romaji.startsWith('ch')) return 't';
+    if (romaji.startsWith('sh')) return 's';
+    if (romaji.startsWith('j')) return 'j';
+    const first = romaji[0];
+    return /[bcdfghjklmnpqrstvwxyz]/.test(first) ? first : '';
+  }
+
+  function uniqueLimited(list, limit = 256) {
+    return [...new Set(list)].slice(0, limit);
+  }
+
+
 
   function normalizeSearchText(text) {
     return String(text || '')
