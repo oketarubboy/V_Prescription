@@ -1,9 +1,8 @@
 処方箋入力チャレンジ PWA
-Version: v11.0.0
+Version: v12.0.0
 
 変更内容:
-- 点眼薬などの使用部位でローマ字入力候補を強化
-- ryo / ryougan / ryogan / ryoume / ryome で「両眼」、migi / migime で「右眼」、hidari / hidarime で「左眼」を候補表示
-- kanbu / youbu / kyoubu / haibu など外用部位のローマ字検索を補強
-- 用法・頓服タイミングの漢字候補もローマ字検索できるように補強
-- Service Workerキャッシュ名を rx-input-challenge-v11 に更新
+- 外用薬の使用部位「腰部」のローマ字検索を強化
+- you / yobu / youbu などの音読み系入力で「腰部」を候補表示
+- koshi / kosi / koshibu / kosibu などの訓読み系入力で「腰部」を候補表示
+- Service Workerキャッシュ名を rx-input-challenge-v12 に更新

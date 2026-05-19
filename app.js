@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = 'v11.0.0';
+  const APP_VERSION = 'v12.0.0';
   const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbzKs2dbznSXPyNJWY0L2Wzfed5m834wBa8FLP9paAyaSJZ6dIx-eST16D3eTVICBs2rRw/exec';
 
   const STORAGE_KEYS = {
@@ -1486,7 +1486,7 @@
     '患部': ['かんぶ', 'kanbu'],
     '胸部': ['きょうぶ', 'kyoubu', 'kyobu'],
     '背部': ['はいぶ', 'haibu'],
-    '腰部': ['ようぶ', 'youbu', 'yobu'],
+    '腰部': ['ようぶ', 'よう', 'こし', '腰', 'youbu', 'yobu', 'you', 'yo', 'koshi', 'kosi', 'koshibu', 'kosibu'],
     '右肩': ['みぎかた', 'migikata'],
     '左肩': ['ひだりかた', 'hidarikata'],
     '右膝': ['みぎひざ', 'migihiza'],
