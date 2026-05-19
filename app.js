@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = 'v10.0.0';
+  const APP_VERSION = 'v11.0.0';
   const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbzKs2dbznSXPyNJWY0L2Wzfed5m834wBa8FLP9paAyaSJZ6dIx-eST16D3eTVICBs2rRw/exec';
 
   const STORAGE_KEYS = {
@@ -1479,6 +1479,59 @@
     'ゔぁ': ['va', 'ba'], 'ゔぃ': ['vi', 'bi'], 'ゔぇ': ['ve', 'be'], 'ゔぉ': ['vo', 'bo'], 'ゔゅ': ['vyu', 'byu']
   };
 
+
+  // 漢字だけの用法・部位・タイミングも、PCでIMEが半角英数字のままのローマ字入力から候補検索できるようにする。
+  // 例：ryo / ryougan → 両眼、migi / migime → 右眼、hidari / hidarime → 左眼、kanbu → 患部。
+  const TEXT_READING_ALIASES = {
+    '患部': ['かんぶ', 'kanbu'],
+    '胸部': ['きょうぶ', 'kyoubu', 'kyobu'],
+    '背部': ['はいぶ', 'haibu'],
+    '腰部': ['ようぶ', 'youbu', 'yobu'],
+    '右肩': ['みぎかた', 'migikata'],
+    '左肩': ['ひだりかた', 'hidarikata'],
+    '右膝': ['みぎひざ', 'migihiza'],
+    '左膝': ['ひだりひざ', 'hidarihiza'],
+    '右肘': ['みぎひじ', 'migihiji'],
+    '左肘': ['ひだりひじ', 'hidarihiji'],
+    '顔': ['かお', 'kao'],
+    '手': ['て', 'te'],
+    '足': ['あし', 'ashi'],
+    '両眼': ['りょうがん', 'りょうめ', 'ryougan', 'ryogan', 'ryoume', 'ryome'],
+    '右眼': ['みぎがん', 'みぎめ', 'migigan', 'migime'],
+    '左眼': ['ひだりがん', 'ひだりめ', 'hidarigan', 'hidarime'],
+    '両鼻': ['りょうび', 'りょうはな', 'りょうばな', 'ryoubi', 'ryobi', 'ryouhana', 'ryohana', 'ryoubana', 'ryobana'],
+    '右鼻': ['みぎはな', 'みぎばな', 'migihana', 'migibana'],
+    '左鼻': ['ひだりはな', 'ひだりばな', 'hidarihana', 'hidaribana'],
+
+    '分1 朝食後': ['ぶんいちあさしょくご', 'ぶん1あさしょくご', 'あさしょくご'],
+    '分1 朝食前': ['ぶんいちあさしょくまえ', 'ぶん1あさしょくまえ', 'あさしょくまえ'],
+    '分1 夕食後': ['ぶんいちゆうしょくご', 'ぶん1ゆうしょくご', 'ゆうしょくご'],
+    '分1 就寝前': ['ぶんいちしゅうしんまえ', 'ぶん1しゅうしんまえ', 'しゅうしんまえ', 'ねるまえ'],
+    '分1 起床時': ['ぶんいちきしょうじ', 'ぶん1きしょうじ', 'きしょうじ'],
+    '分1 空腹時': ['ぶんいちくうふくじ', 'ぶん1くうふくじ', 'くうふくじ'],
+    '分2 朝夕食後': ['ぶんにあさゆうしょくご', 'ぶん2あさゆうしょくご', 'あさゆうしょくご'],
+    '分2 朝食後・夕食後': ['ぶんにあさしょくごゆうしょくご', 'ぶん2あさしょくごゆうしょくご', 'あさしょくごゆうしょくご'],
+    '分3 毎食後': ['ぶんさんまいしょくご', 'ぶん3まいしょくご', 'まいしょくご'],
+    '分3 毎食前': ['ぶんさんまいしょくまえ', 'ぶん3まいしょくまえ', 'まいしょくまえ'],
+    '分3 毎食直前': ['ぶんさんまいしょくちょくぜん', 'ぶん3まいしょくちょくぜん', 'まいしょくちょくぜん'],
+    '分4 毎食後・就寝前': ['ぶんよんまいしょくごしゅうしんまえ', 'ぶん4まいしょくごしゅうしんまえ', 'まいしょくごしゅうしんまえ'],
+    '1日1回': ['いちにちいっかい', 'いちにち1かい'],
+    '1日2回': ['いちにちにかい', 'いちにち2かい'],
+    '1日3回': ['いちにちさんかい', 'いちにち3かい'],
+    '1日4回': ['いちにちよんかい', 'いちにち4かい'],
+
+    '疼痛時': ['とうつうじ', 'いたいとき'],
+    '発熱時': ['はつねつじ', 'ねつがあるとき'],
+    '頭痛時': ['ずつうじ', 'あたまがいたいとき'],
+    '不眠時': ['ふみんじ', 'ねむれないとき'],
+    '便秘時': ['べんぴじ'],
+    '悪心時': ['おしんじ', 'はきけじ'],
+    '咳がひどい時': ['せきがひどいとき'],
+    '吐き気時': ['はきけじ'],
+    '不安時': ['ふあんじ'],
+    'こむら返り時': ['こむらがえりじ']
+  };
+
   const DRUG_MASTER = buildDrugMaster();
   const USAGE_MASTER = buildUsageMaster();
   const SITE_MASTER = buildSiteMaster();
@@ -2439,7 +2492,8 @@
 
 
   function buildTextRomajiSearchTexts(text) {
-    const sourceTexts = [text, stripNonKana(text)].filter(Boolean);
+    const manualReadings = TEXT_READING_ALIASES[text] || [];
+    const sourceTexts = [text, stripNonKana(text), ...manualReadings].filter(Boolean);
     const set = new Set();
     sourceTexts.forEach((source) => {
       kanaToRomajiVariants(source).forEach((variant) => {
