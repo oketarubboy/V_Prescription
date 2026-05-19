@@ -127,7 +127,7 @@ button:disabled { opacity: .55; cursor: not-allowed; }
   margin: 18px 0;
 }
 .form-grid.single { grid-template-columns: minmax(200px, 360px); }
-label { display: grid; gap: 7px; font-weight: 700; }
+label { position: relative; display: grid; gap: 7px; font-weight: 700; }
 input, select {
   width: 100%;
   min-height: 46px;
@@ -250,6 +250,13 @@ input[data-input-kind="kana"] { ime-mode: active; }
   margin-bottom: 14px;
 }
 .entry-input { height: 46px; line-height: 1.2; font-size: 16px; }
+.ime-kana-input {
+  ime-mode: active;
+}
+.ime-number-input {
+  ime-mode: disabled;
+}
+
 .med-input-rows { display: grid; gap: 12px; }
 .med-input-row {
   border: 1px solid #dcece9;
@@ -276,9 +283,12 @@ input[data-input-kind="kana"] { ime-mode: active; }
 .med-input-grid.prn { grid-template-columns: minmax(170px, 1.45fr) minmax(115px, .72fr) minmax(145px, 1fr) minmax(95px, .58fr); }
 
 .candidate-box {
-  position: fixed;
+  position: absolute;
+  left: 0;
+  top: calc(100% + 4px);
+  right: 0;
   z-index: 10000;
-  border: 1.8px solid #99d8d2;
+  border: 1.8px solid #0f766e;
   border-radius: 12px;
   overflow: hidden;
   background: #ffffff;

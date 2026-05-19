@@ -1,5 +1,5 @@
-const APP_VERSION = 'v6.0.0';
-const CACHE_NAME = 'rx-input-challenge-v6';
+const APP_VERSION = 'v7.0.0';
+const CACHE_NAME = 'rx-input-challenge-v7';
 const ASSETS = [
   './',
   './index.html',

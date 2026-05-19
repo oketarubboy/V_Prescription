@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = 'v6.0.0';
+  const APP_VERSION = 'v7.0.0';
   const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbzKs2dbznSXPyNJWY0L2Wzfed5m834wBa8FLP9paAyaSJZ6dIx-eST16D3eTVICBs2rRw/exec';
 
   const STORAGE_KEYS = {
@@ -408,8 +408,9 @@
   function renderMedInputRow(item, index) {
     const fieldsHtml = item.fields.map((field) => {
       const classNames = ['entry-input', 'med-field'];
-      if (field.key === 'name') classNames.push('drug-name-input');
+      if (field.key === 'name') classNames.push('drug-name-input', 'ime-kana-input');
       if (field.key === 'usage' || field.key === 'timing') classNames.push('usage-input');
+      if (isNumericOnlyField(field.key)) classNames.push('ime-number-input');
       const attrs = fieldInputAttributes(field);
       const inputHtml = `<input class="${classNames.join(' ')}" type="text" ${attrs} data-row="${index}" data-field="${escapeHtml(field.key)}" placeholder="${escapeHtml(inputPlaceholder(field))}" />`;
       return `
@@ -563,6 +564,10 @@
       hideCandidates();
       return;
     }
+    const host = input.closest('label') || input.parentElement || els.medInputRows;
+    if (els.candidateBox.parentElement !== host) {
+      host.appendChild(els.candidateBox);
+    }
     els.candidateBox.classList.remove('hidden');
     els.candidateList.innerHTML = state.candidates.map((item, index) => `
       <button type="button" class="candidate-item ${index === state.candidateIndex ? 'active' : ''}" data-index="${index}">
@@ -590,6 +595,7 @@
     els.candidateList.innerHTML = '';
     els.candidateBox.style.left = '';
     els.candidateBox.style.top = '';
+    els.candidateBox.style.right = '';
     els.candidateBox.style.width = '';
     state.candidates = [];
     state.candidateIndex = 0;
@@ -598,11 +604,11 @@
 
   function positionCandidateBox(input = state.activeCandidateInput) {
     if (!input || els.candidateBox.classList.contains('hidden')) return;
-    const rect = input.getBoundingClientRect();
-    const margin = 4;
-    els.candidateBox.style.left = `${Math.max(8, rect.left)}px`;
-    els.candidateBox.style.top = `${Math.min(window.innerHeight - 60, rect.bottom + margin)}px`;
-    els.candidateBox.style.width = `${Math.max(220, rect.width)}px`;
+    // 候補は入力欄の親label内に配置し、レセコンのドロップダウンのように入力欄直下へ表示する。
+    els.candidateBox.style.left = '0';
+    els.candidateBox.style.top = 'calc(100% + 4px)';
+    els.candidateBox.style.right = '0';
+    els.candidateBox.style.width = '100%';
   }
 
   function isAutocompleteInput(input) {
