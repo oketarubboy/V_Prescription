@@ -1,9 +1,8 @@
-処方箋入力チャレンジ
-Version: v9.0.0
+処方箋入力チャレンジ PWA
+Version: v10.0.0
 
 変更内容:
-- 頓服薬の服用・使用タイミングをローマ字入力候補に対応
-- 外用薬の使用部位をローマ字入力候補に対応
-- 外用貼付剤の「1日●回」は●だけ入力して候補表示・判定可能に変更
-- 現在の医薬品一覧ファイル medicine-master-current.csv / .md を追加
-- Service Workerキャッシュ名を rx-input-challenge-v9 に更新
+- 医薬品マスタを大幅増量
+- 内服薬、外用薬、貼付剤、点眼薬、頓服薬、小児処方、漢方処方のバリエーションを追加
+- medicine-master-current.csv / .md を v10.0.0 に更新
+- Service Workerキャッシュ名を rx-input-challenge-v10 に更新

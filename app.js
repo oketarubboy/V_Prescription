@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = 'v9.0.0';
+  const APP_VERSION = 'v10.0.0';
   const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbzKs2dbznSXPyNJWY0L2Wzfed5m834wBa8FLP9paAyaSJZ6dIx-eST16D3eTVICBs2rRw/exec';
 
   const STORAGE_KEYS = {
@@ -14,65 +14,1427 @@
 
   const MED_SETS = [
     {
-      department: '内科', theme: '血圧管理', difficulty: '標準', note: '継続処方。患者情報、日数、用法を確認して入力。',
+      department: "循環器内科",
+      theme: "血圧管理",
+      difficulty: "標準",
+      note: "降圧薬・利尿薬の継続処方。薬品名の数字と用法を確認して入力。",
       drugs: [
-        { type: 'regular', name: 'アムロジピンOD錠5mg', reading: 'アムロジピンODジョウ5mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [14, 28, 30] },
-        { type: 'regular', name: 'テルミサルタン錠40mg', reading: 'テルミサルタンジョウ40mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [14, 28, 30] },
-        { type: 'regular', name: 'ロスバスタチン錠2.5mg', reading: 'ロスバスタチンジョウ2.5mg', amounts: ['1錠'], usages: ['分1 夕食後'], days: [14, 28, 30] },
-        { type: 'regular', name: '酸化マグネシウム錠330mg', reading: 'サンカマグネシウムジョウ330mg', amounts: ['3錠', '6錠'], usages: ['分3 毎食後'], days: [14, 28] }
+        {
+          type: "regular",
+          name: "アムロジピンOD錠5mg",
+          reading: "アムロジピンODジョウ5mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28, 30, 56]
+        },
+        {
+          type: "regular",
+          name: "アムロジピン錠2.5mg",
+          reading: "アムロジピンジョウ2.5mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "ニフェジピンCR錠20mg",
+          reading: "ニフェジピンCRジョウ20mg",
+          amounts: ["1錠", "2錠"],
+          usages: ["分1 朝食後", "分2 朝夕食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "テルミサルタン錠40mg",
+          reading: "テルミサルタンジョウ40mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28, 30, 56]
+        },
+        {
+          type: "regular",
+          name: "カンデサルタン錠8mg",
+          reading: "カンデサルタンジョウ8mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "オルメサルタンOD錠20mg",
+          reading: "オルメサルタンODジョウ20mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "ロサルタンK錠50mg",
+          reading: "ロサルタンKジョウ50mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "エナラプリル錠5mg",
+          reading: "エナラプリルジョウ5mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "アジルサルタン錠20mg",
+          reading: "アジルサルタンジョウ20mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "ビソプロロールフマル酸塩錠2.5mg",
+          reading: "ビソプロロールフマルサンエンジョウ2.5mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "カルベジロール錠10mg",
+          reading: "カルベジロールジョウ10mg",
+          amounts: ["1錠", "2錠"],
+          usages: ["分1 朝食後", "分2 朝夕食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "フロセミド錠20mg",
+          reading: "フロセミドジョウ20mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "アゾセミド錠30mg",
+          reading: "アゾセミドジョウ30mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "スピロノラクトン錠25mg",
+          reading: "スピロノラクトンジョウ25mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "トリクロルメチアジド錠1mg",
+          reading: "トリクロルメチアジドジョウ1mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "ドキサゾシン錠1mg",
+          reading: "ドキサゾシンジョウ1mg",
+          amounts: ["1錠"],
+          usages: ["分1 就寝前"],
+          days: [14, 28, 30]
+        }
       ]
     },
     {
-      department: '整形外科', theme: '疼痛管理', difficulty: 'やさしい', note: '内服薬と頓服の入力順を区別して入力。',
+      department: "内科",
+      theme: "脂質管理",
+      difficulty: "標準",
+      note: "脂質異常症の処方。規格違いの薬品名入力に注意。",
       drugs: [
-        { type: 'regular', name: 'ロキソプロフェンNa錠60mg', reading: 'ロキソプロフェンNaジョウ60mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7, 14] },
-        { type: 'regular', name: 'レバミピド錠100mg', reading: 'レバミピドジョウ100mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7, 14] },
-        { type: 'prn', name: 'ロキソプロフェンNa錠60mg', reading: 'ロキソプロフェンNaジョウ60mg', perDoses: ['1錠'], timings: ['疼痛時'], times: [5, 10, 15] },
-        { type: 'external', name: 'ケトプロフェンテープ40mg', reading: 'ケトプロフェンテープ40mg', totals: ['21枚', '35枚'], sites: ['患部'], usages: ['1日1回'] }
+        {
+          type: "regular",
+          name: "ロスバスタチン錠2.5mg",
+          reading: "ロスバスタチンジョウ2.5mg",
+          amounts: ["1錠"],
+          usages: ["分1 夕食後", "分1 朝食後"],
+          days: [14, 28, 30, 56]
+        },
+        {
+          type: "regular",
+          name: "ロスバスタチン錠5mg",
+          reading: "ロスバスタチンジョウ5mg",
+          amounts: ["1錠"],
+          usages: ["分1 夕食後", "分1 朝食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "アトルバスタチン錠10mg",
+          reading: "アトルバスタチンジョウ10mg",
+          amounts: ["1錠"],
+          usages: ["分1 夕食後", "分1 朝食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "ピタバスタチンCa錠2mg",
+          reading: "ピタバスタチンCaジョウ2mg",
+          amounts: ["1錠"],
+          usages: ["分1 夕食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "プラバスタチンNa錠10mg",
+          reading: "プラバスタチンNaジョウ10mg",
+          amounts: ["1錠"],
+          usages: ["分1 夕食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "シンバスタチン錠5mg",
+          reading: "シンバスタチンジョウ5mg",
+          amounts: ["1錠"],
+          usages: ["分1 夕食後"],
+          days: [14, 28]
+        },
+        {
+          type: "regular",
+          name: "エゼチミブ錠10mg",
+          reading: "エゼチミブジョウ10mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "フェノフィブラート錠80mg",
+          reading: "フェノフィブラートジョウ80mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "イコサペント酸エチル粒状カプセル900mg",
+          reading: "イコサペントサンエチルリュウジョウカプセル900mg",
+          amounts: ["2包", "3包"],
+          usages: ["分2 朝夕食後", "分3 毎食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "ベザフィブラートSR錠200mg",
+          reading: "ベザフィブラートSRジョウ200mg",
+          amounts: ["2錠"],
+          usages: ["分2 朝夕食後"],
+          days: [14, 28, 30]
+        }
       ]
     },
     {
-      department: '耳鼻咽喉科', theme: '感冒症状', difficulty: '標準', note: '粉薬・錠剤が混在。薬品名と用法を正確に入力。',
+      department: "糖尿病内科",
+      theme: "生活習慣病",
+      difficulty: "むずかしい",
+      note: "糖尿病薬の長期処方。薬品名の英数字と用法を正確に入力。",
       drugs: [
-        { type: 'regular', name: 'カルボシステイン錠500mg', reading: 'カルボシステインジョウ500mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7] },
-        { type: 'regular', name: 'デキストロメトルファン臭化水素酸塩錠15mg', reading: 'デキストロメトルファンシュウカスイソサンエンジョウ15mg', amounts: ['3錠'], usages: ['分3 毎食後'], days: [5, 7] },
-        { type: 'prn', name: 'アセトアミノフェン錠200mg', reading: 'アセトアミノフェンジョウ200mg', perDoses: ['2錠'], timings: ['発熱時'], times: [5, 10] },
-        { type: 'external', name: 'ツロブテロールテープ1mg', reading: 'ツロブテロールテープ1mg', totals: ['7枚'], sites: ['胸部'], usages: ['1日1回'] }
+        {
+          type: "regular",
+          name: "メトホルミン塩酸塩錠250mg",
+          reading: "メトホルミンエンサンエンジョウ250mg",
+          amounts: ["2錠", "3錠"],
+          usages: ["分2 朝夕食後", "分3 毎食後"],
+          days: [28, 30, 56]
+        },
+        {
+          type: "regular",
+          name: "メトホルミン塩酸塩錠500mg",
+          reading: "メトホルミンエンサンエンジョウ500mg",
+          amounts: ["2錠"],
+          usages: ["分2 朝夕食後"],
+          days: [28, 30, 56]
+        },
+        {
+          type: "regular",
+          name: "ジャディアンス錠10mg",
+          reading: "ジャディアンスジョウ10mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [28, 30, 56]
+        },
+        {
+          type: "regular",
+          name: "ジャディアンス錠25mg",
+          reading: "ジャディアンスジョウ25mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [28, 30]
+        },
+        {
+          type: "regular",
+          name: "フォシーガ錠5mg",
+          reading: "フォシーガジョウ5mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [28, 30, 56]
+        },
+        {
+          type: "regular",
+          name: "グリメピリド錠1mg",
+          reading: "グリメピリドジョウ1mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [28, 30]
+        },
+        {
+          type: "regular",
+          name: "ピオグリタゾン錠15mg",
+          reading: "ピオグリタゾンジョウ15mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [28, 30]
+        },
+        {
+          type: "regular",
+          name: "シタグリプチン錠50mg",
+          reading: "シタグリプチンジョウ50mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [28, 30]
+        },
+        {
+          type: "regular",
+          name: "テネリグリプチン錠20mg",
+          reading: "テネリグリプチンジョウ20mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [28, 30]
+        },
+        {
+          type: "regular",
+          name: "リナグリプチン錠5mg",
+          reading: "リナグリプチンジョウ5mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [28, 30]
+        },
+        {
+          type: "regular",
+          name: "ミチグリニドCa・OD錠10mg",
+          reading: "ミチグリニドCaODジョウ10mg",
+          amounts: ["3錠"],
+          usages: ["分3 毎食直前"],
+          days: [28, 30]
+        },
+        {
+          type: "regular",
+          name: "ボグリボースOD錠0.2mg",
+          reading: "ボグリボースODジョウ0.2mg",
+          amounts: ["3錠"],
+          usages: ["分3 毎食直前"],
+          days: [28, 30]
+        },
+        {
+          type: "regular",
+          name: "アカルボース錠100mg",
+          reading: "アカルボースジョウ100mg",
+          amounts: ["3錠"],
+          usages: ["分3 毎食直前"],
+          days: [28, 30]
+        },
+        {
+          type: "regular",
+          name: "リベルサス錠3mg",
+          reading: "リベルサスジョウ3mg",
+          amounts: ["1錠"],
+          usages: ["分1 起床時"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "リベルサス錠7mg",
+          reading: "リベルサスジョウ7mg",
+          amounts: ["1錠"],
+          usages: ["分1 起床時"],
+          days: [14, 28, 30]
+        }
       ]
     },
     {
-      department: '消化器内科', theme: '胃腸症状', difficulty: '標準', note: '食前・食後の違いに注意。',
+      department: "消化器内科",
+      theme: "胃腸症状",
+      difficulty: "標準",
+      note: "胃薬・整腸剤・便秘薬が混在。食前、食後、就寝前に注意。",
       drugs: [
-        { type: 'regular', name: 'ランソプラゾールOD錠15mg', reading: 'ランソプラゾールODジョウ15mg', amounts: ['1錠'], usages: ['分1 朝食前'], days: [14, 28] },
-        { type: 'regular', name: 'モサプリドクエン酸塩錠5mg', reading: 'モサプリドクエンサンエンジョウ5mg', amounts: ['3錠'], usages: ['分3 毎食前'], days: [7, 14] },
-        { type: 'regular', name: 'ビオフェルミン錠剤', reading: 'ビオフェルミンジョウザイ', amounts: ['3錠', '6錠'], usages: ['分3 毎食後'], days: [7, 14] }
+        {
+          type: "regular",
+          name: "ランソプラゾールOD錠15mg",
+          reading: "ランソプラゾールODジョウ15mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食前"],
+          days: [14, 28]
+        },
+        {
+          type: "regular",
+          name: "エソメプラゾールカプセル20mg",
+          reading: "エソメプラゾールカプセル20mg",
+          amounts: ["1カプセル"],
+          usages: ["分1 朝食後", "分1 朝食前"],
+          days: [14, 28]
+        },
+        {
+          type: "regular",
+          name: "ボノプラザン錠10mg",
+          reading: "ボノプラザンジョウ10mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28]
+        },
+        {
+          type: "regular",
+          name: "ファモチジンOD錠20mg",
+          reading: "ファモチジンODジョウ20mg",
+          amounts: ["1錠", "2錠"],
+          usages: ["分1 夕食後", "分2 朝夕食後"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "レバミピド錠100mg",
+          reading: "レバミピドジョウ100mg",
+          amounts: ["3錠"],
+          usages: ["分3 毎食後"],
+          days: [5, 7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "モサプリドクエン酸塩錠5mg",
+          reading: "モサプリドクエンサンエンジョウ5mg",
+          amounts: ["3錠"],
+          usages: ["分3 毎食前"],
+          days: [7, 14]
+        },
+        {
+          type: "regular",
+          name: "ドンペリドン錠10mg",
+          reading: "ドンペリドンジョウ10mg",
+          amounts: ["3錠"],
+          usages: ["分3 毎食前"],
+          days: [5, 7]
+        },
+        {
+          type: "regular",
+          name: "メトクロプラミド錠5mg",
+          reading: "メトクロプラミドジョウ5mg",
+          amounts: ["3錠"],
+          usages: ["分3 毎食前"],
+          days: [5, 7]
+        },
+        {
+          type: "regular",
+          name: "ビオフェルミン錠剤",
+          reading: "ビオフェルミンジョウザイ",
+          amounts: ["3錠", "6錠"],
+          usages: ["分3 毎食後"],
+          days: [7, 14]
+        },
+        {
+          type: "regular",
+          name: "ミヤBM錠",
+          reading: "ミヤBMジョウ",
+          amounts: ["3錠", "6錠"],
+          usages: ["分3 毎食後"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "酪酸菌錠",
+          reading: "ラクサンキンジョウ",
+          amounts: ["3錠", "6錠"],
+          usages: ["分3 毎食後"],
+          days: [7, 14]
+        },
+        {
+          type: "regular",
+          name: "酸化マグネシウム錠330mg",
+          reading: "サンカマグネシウムジョウ330mg",
+          amounts: ["3錠", "6錠"],
+          usages: ["分3 毎食後"],
+          days: [14, 28]
+        },
+        {
+          type: "regular",
+          name: "センノシド錠12mg",
+          reading: "センノシドジョウ12mg",
+          amounts: ["1錠", "2錠"],
+          usages: ["分1 就寝前"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "ウルソデオキシコール酸錠100mg",
+          reading: "ウルソデオキシコールサンジョウ100mg",
+          amounts: ["3錠"],
+          usages: ["分3 毎食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "六君子湯エキス顆粒",
+          reading: "ロックンシトウエキスカリュウ",
+          amounts: ["7.5g"],
+          usages: ["分3 毎食前"],
+          days: [7, 14, 28]
+        }
       ]
     },
     {
-      department: '小児科', theme: '小児処方', difficulty: 'むずかしい', note: '小児用量の単位と粉薬名を確認。',
+      department: "呼吸器内科",
+      theme: "咳・痰・喘息",
+      difficulty: "標準",
+      note: "咳止め、去痰薬、吸入補助薬が混在。頓服との違いに注意。",
       drugs: [
-        { type: 'regular', name: 'アスベリン散10%', reading: 'アスベリンサン10%', amounts: ['0.6g', '0.9g'], usages: ['分3 毎食後'], days: [5, 7] },
-        { type: 'regular', name: 'ムコダインDS50%', reading: 'ムコダインDS50%', amounts: ['1.2g', '1.5g'], usages: ['分3 毎食後'], days: [5, 7] },
-        { type: 'prn', name: 'カロナール細粒20%', reading: 'カロナールサイリュウ20%', perDoses: ['1.0g'], timings: ['発熱時'], times: [5, 8] },
-        { type: 'regular', name: 'ホクナリンドライシロップ0.1%', reading: 'ホクナリンドライシロップ0.1%', amounts: ['0.5g'], usages: ['分2 朝夕食後'], days: [5, 7] }
+        {
+          type: "regular",
+          name: "モンテルカスト錠10mg",
+          reading: "モンテルカストジョウ10mg",
+          amounts: ["1錠"],
+          usages: ["分1 就寝前"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "テオフィリン徐放錠200mg",
+          reading: "テオフィリンジョホウジョウ200mg",
+          amounts: ["2錠"],
+          usages: ["分2 朝夕食後"],
+          days: [14, 28]
+        },
+        {
+          type: "regular",
+          name: "アンブロキソール塩酸塩錠15mg",
+          reading: "アンブロキソールエンサンエンジョウ15mg",
+          amounts: ["3錠"],
+          usages: ["分3 毎食後"],
+          days: [5, 7, 14]
+        },
+        {
+          type: "regular",
+          name: "カルボシステイン錠500mg",
+          reading: "カルボシステインジョウ500mg",
+          amounts: ["3錠"],
+          usages: ["分3 毎食後"],
+          days: [5, 7, 14]
+        },
+        {
+          type: "regular",
+          name: "デキストロメトルファン臭化水素酸塩錠15mg",
+          reading: "デキストロメトルファンシュウカスイソサンエンジョウ15mg",
+          amounts: ["3錠"],
+          usages: ["分3 毎食後"],
+          days: [5, 7]
+        },
+        {
+          type: "regular",
+          name: "チペピジンヒベンズ酸塩錠20mg",
+          reading: "チペピジンヒベンズサンエンジョウ20mg",
+          amounts: ["3錠"],
+          usages: ["分3 毎食後"],
+          days: [5, 7]
+        },
+        {
+          type: "regular",
+          name: "フスコデ配合錠",
+          reading: "フスコデハイゴウジョウ",
+          amounts: ["3錠", "6錠"],
+          usages: ["分3 毎食後"],
+          days: [5, 7]
+        },
+        {
+          type: "regular",
+          name: "ムコソルバンL錠45mg",
+          reading: "ムコソルバンLジョウ45mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [7, 14]
+        },
+        {
+          type: "regular",
+          name: "プレドニゾロン錠5mg",
+          reading: "プレドニゾロンジョウ5mg",
+          amounts: ["1錠", "2錠"],
+          usages: ["分1 朝食後"],
+          days: [3, 5, 7]
+        },
+        {
+          type: "prn",
+          name: "デキストロメトルファン臭化水素酸塩錠15mg",
+          reading: "デキストロメトルファンシュウカスイソサンエンジョウ15mg",
+          perDoses: ["1錠"],
+          timings: ["咳がひどい時"],
+          times: [5, 10]
+        }
       ]
     },
     {
-      department: '皮膚科', theme: '外用薬', difficulty: 'むずかしい', note: '外用薬は薬品名、処方された全量、使用部位、用法の順に入力。',
+      department: "耳鼻咽喉科",
+      theme: "アレルギー・感冒症状",
+      difficulty: "標準",
+      note: "抗アレルギー薬、点鼻薬、抗菌薬の組み合わせ。",
       drugs: [
-        { type: 'external', name: 'ヒルドイドソフト軟膏0.3%', reading: 'ヒルドイドソフトナンコウ0.3%', totals: ['25g', '50g'], sites: ['患部'], usages: ['1日2回'] },
-        { type: 'external', name: 'ロコイド軟膏0.1%', reading: 'ロコイドナンコウ0.1%', totals: ['5g', '10g'], sites: ['患部'], usages: ['1日2回'] },
-        { type: 'regular', name: 'アレグラ錠60mg', reading: 'アレグラジョウ60mg', amounts: ['2錠'], usages: ['分2 朝夕食後'], days: [7, 14] },
-        { type: 'external', name: 'ヘパリン類似物質ローション0.3%', reading: 'ヘパリンルイジブッシツローション0.3%', totals: ['50g'], sites: ['患部'], usages: ['1日2回'] }
+        {
+          type: "regular",
+          name: "フェキソフェナジン塩酸塩錠60mg",
+          reading: "フェキソフェナジンエンサンエンジョウ60mg",
+          amounts: ["2錠"],
+          usages: ["分2 朝夕食後"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "レボセチリジン塩酸塩錠5mg",
+          reading: "レボセチリジンエンサンエンジョウ5mg",
+          amounts: ["1錠"],
+          usages: ["分1 就寝前"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "ビラスチン錠20mg",
+          reading: "ビラスチンジョウ20mg",
+          amounts: ["1錠"],
+          usages: ["分1 空腹時"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "デスロラタジン錠5mg",
+          reading: "デスロラタジンジョウ5mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "エピナスチン塩酸塩錠20mg",
+          reading: "エピナスチンエンサンエンジョウ20mg",
+          amounts: ["1錠"],
+          usages: ["分1 就寝前"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "オロパタジン塩酸塩錠5mg",
+          reading: "オロパタジンエンサンエンジョウ5mg",
+          amounts: ["2錠"],
+          usages: ["分2 朝夕食後"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "ベポタスチンベシル酸塩錠10mg",
+          reading: "ベポタスチンベシルサンエンジョウ10mg",
+          amounts: ["2錠"],
+          usages: ["分2 朝夕食後"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "トラネキサム酸錠250mg",
+          reading: "トラネキサムサンジョウ250mg",
+          amounts: ["3錠", "6錠"],
+          usages: ["分3 毎食後"],
+          days: [5, 7]
+        },
+        {
+          type: "regular",
+          name: "クラリスロマイシン錠200mg",
+          reading: "クラリスロマイシンジョウ200mg",
+          amounts: ["2錠"],
+          usages: ["分2 朝夕食後"],
+          days: [5, 7]
+        },
+        {
+          type: "regular",
+          name: "セフカペンピボキシル塩酸塩錠100mg",
+          reading: "セフカペンピボキシルエンサンエンジョウ100mg",
+          amounts: ["3錠"],
+          usages: ["分3 毎食後"],
+          days: [5, 7]
+        },
+        {
+          type: "external",
+          name: "モメタゾン点鼻液50μg",
+          reading: "モメタゾンテンビエキ50マイクログラム",
+          usages: ["1日1回"],
+          totals: ["1本"],
+          sites: ["両鼻"]
+        },
+        {
+          type: "external",
+          name: "アラミスト点鼻液27.5μg",
+          reading: "アラミストテンビエキ27.5マイクログラム",
+          usages: ["1日1回"],
+          totals: ["1本"],
+          sites: ["両鼻"]
+        },
+        {
+          type: "prn",
+          name: "アセトアミノフェン錠200mg",
+          reading: "アセトアミノフェンジョウ200mg",
+          perDoses: ["2錠"],
+          timings: ["発熱時"],
+          times: [5, 10]
+        }
       ]
     },
     {
-      department: '糖尿病内科', theme: '生活習慣病', difficulty: 'むずかしい', note: '長期処方。薬品名の数字まで入力。',
+      department: "整形外科",
+      theme: "疼痛管理",
+      difficulty: "標準",
+      note: "内服薬・頓服薬・貼付剤を区別して入力。貼付剤は1日回数のみ入力。",
       drugs: [
-        { type: 'regular', name: 'メトホルミン塩酸塩錠250mg', reading: 'メトホルミンエンサンエンジョウ250mg', amounts: ['2錠', '3錠'], usages: ['分2 朝夕食後', '分3 毎食後'], days: [28, 30, 56] },
-        { type: 'regular', name: 'ジャディアンス錠10mg', reading: 'ジャディアンスジョウ10mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [28, 30, 56] },
-        { type: 'regular', name: 'グリメピリド錠1mg', reading: 'グリメピリドジョウ1mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [28, 30] },
-        { type: 'regular', name: 'ピオグリタゾン錠15mg', reading: 'ピオグリタゾンジョウ15mg', amounts: ['1錠'], usages: ['分1 朝食後'], days: [28, 30] }
+        {
+          type: "regular",
+          name: "ロキソプロフェンNa錠60mg",
+          reading: "ロキソプロフェンNaジョウ60mg",
+          amounts: ["3錠"],
+          usages: ["分3 毎食後"],
+          days: [5, 7, 14]
+        },
+        {
+          type: "regular",
+          name: "セレコキシブ錠100mg",
+          reading: "セレコキシブジョウ100mg",
+          amounts: ["2錠"],
+          usages: ["分2 朝夕食後"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "アセトアミノフェン錠500mg",
+          reading: "アセトアミノフェンジョウ500mg",
+          amounts: ["3錠"],
+          usages: ["分3 毎食後"],
+          days: [5, 7, 14]
+        },
+        {
+          type: "regular",
+          name: "トラマドール塩酸塩OD錠25mg",
+          reading: "トラマドールエンサンエンODジョウ25mg",
+          amounts: ["2錠", "4錠"],
+          usages: ["分2 朝夕食後", "分4 毎食後・就寝前"],
+          days: [7, 14]
+        },
+        {
+          type: "regular",
+          name: "プレガバリンOD錠25mg",
+          reading: "プレガバリンODジョウ25mg",
+          amounts: ["2錠"],
+          usages: ["分2 朝夕食後"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "プレガバリンOD錠75mg",
+          reading: "プレガバリンODジョウ75mg",
+          amounts: ["2錠"],
+          usages: ["分2 朝夕食後"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "ミロガバリンベシル酸塩錠5mg",
+          reading: "ミロガバリンベシルサンエンジョウ5mg",
+          amounts: ["2錠"],
+          usages: ["分2 朝夕食後"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "エペリゾン塩酸塩錠50mg",
+          reading: "エペリゾンエンサンエンジョウ50mg",
+          amounts: ["3錠"],
+          usages: ["分3 毎食後"],
+          days: [7, 14]
+        },
+        {
+          type: "regular",
+          name: "チザニジン錠1mg",
+          reading: "チザニジンジョウ1mg",
+          amounts: ["3錠"],
+          usages: ["分3 毎食後"],
+          days: [7, 14]
+        },
+        {
+          type: "regular",
+          name: "メコバラミン錠500μg",
+          reading: "メコバラミンジョウ500マイクログラム",
+          amounts: ["3錠"],
+          usages: ["分3 毎食後"],
+          days: [14, 28]
+        },
+        {
+          type: "regular",
+          name: "アルファカルシドールカプセル0.25μg",
+          reading: "アルファカルシドールカプセル0.25マイクログラム",
+          amounts: ["1カプセル"],
+          usages: ["分1 朝食後"],
+          days: [28, 30]
+        },
+        {
+          type: "regular",
+          name: "エルデカルシトールカプセル0.75μg",
+          reading: "エルデカルシトールカプセル0.75マイクログラム",
+          amounts: ["1カプセル"],
+          usages: ["分1 朝食後"],
+          days: [28, 30]
+        },
+        {
+          type: "regular",
+          name: "リセドロン酸Na錠2.5mg",
+          reading: "リセドロンサンNaジョウ2.5mg",
+          amounts: ["1錠"],
+          usages: ["分1 起床時"],
+          days: [28, 30]
+        },
+        {
+          type: "prn",
+          name: "ロキソプロフェンNa錠60mg",
+          reading: "ロキソプロフェンNaジョウ60mg",
+          perDoses: ["1錠"],
+          timings: ["疼痛時"],
+          times: [5, 10, 15]
+        },
+        {
+          type: "prn",
+          name: "アセトアミノフェン錠500mg",
+          reading: "アセトアミノフェンジョウ500mg",
+          perDoses: ["1錠"],
+          timings: ["疼痛時", "発熱時"],
+          times: [5, 10]
+        },
+        {
+          type: "external",
+          name: "ケトプロフェンテープ40mg",
+          reading: "ケトプロフェンテープ40mg",
+          usages: ["1日1回"],
+          totals: ["21枚", "35枚"],
+          sites: ["患部", "腰部", "右膝", "左膝"]
+        },
+        {
+          type: "external",
+          name: "ロキソプロフェンNaテープ100mg",
+          reading: "ロキソプロフェンNaテープ100mg",
+          usages: ["1日1回"],
+          totals: ["14枚", "28枚"],
+          sites: ["患部", "腰部", "右肩", "左肩"]
+        },
+        {
+          type: "external",
+          name: "ジクロフェナクNaテープ15mg",
+          reading: "ジクロフェナクNaテープ15mg",
+          usages: ["1日1回"],
+          totals: ["14枚", "28枚"],
+          sites: ["患部", "右膝", "左膝"]
+        },
+        {
+          type: "external",
+          name: "フルルビプロフェンテープ40mg",
+          reading: "フルルビプロフェンテープ40mg",
+          usages: ["1日2回"],
+          totals: ["14枚", "28枚"],
+          sites: ["患部", "腰部"]
+        },
+        {
+          type: "external",
+          name: "ロキソニンパップ100mg",
+          reading: "ロキソニンパップ100mg",
+          usages: ["1日1回"],
+          totals: ["14枚", "28枚"],
+          sites: ["患部", "腰部"]
+        }
+      ]
+    },
+    {
+      department: "皮膚科",
+      theme: "外用薬",
+      difficulty: "むずかしい",
+      note: "軟膏・クリーム・ローションなど剤形違いに注意。外用薬は全量、部位、用法の順に入力。",
+      drugs: [
+        {
+          type: "external",
+          name: "ヒルドイドソフト軟膏0.3%",
+          reading: "ヒルドイドソフトナンコウ0.3%",
+          usages: ["1日2回"],
+          totals: ["25g", "50g"],
+          sites: ["患部"]
+        },
+        {
+          type: "external",
+          name: "ヘパリン類似物質ローション0.3%",
+          reading: "ヘパリンルイジブッシツローション0.3%",
+          usages: ["1日2回"],
+          totals: ["50g", "100g"],
+          sites: ["患部"]
+        },
+        {
+          type: "external",
+          name: "ヘパリン類似物質クリーム0.3%",
+          reading: "ヘパリンルイジブッシツクリーム0.3%",
+          usages: ["1日2回"],
+          totals: ["25g", "50g"],
+          sites: ["患部"]
+        },
+        {
+          type: "external",
+          name: "ロコイド軟膏0.1%",
+          reading: "ロコイドナンコウ0.1%",
+          usages: ["1日2回"],
+          totals: ["5g", "10g"],
+          sites: ["患部", "顔"]
+        },
+        {
+          type: "external",
+          name: "リンデロンVG軟膏0.12%",
+          reading: "リンデロンVGナンコウ0.12%",
+          usages: ["1日2回"],
+          totals: ["5g", "10g"],
+          sites: ["患部"]
+        },
+        {
+          type: "external",
+          name: "アンテベート軟膏0.05%",
+          reading: "アンテベートナンコウ0.05%",
+          usages: ["1日2回"],
+          totals: ["5g", "10g"],
+          sites: ["患部"]
+        },
+        {
+          type: "external",
+          name: "マイザー軟膏0.05%",
+          reading: "マイザーナンコウ0.05%",
+          usages: ["1日2回"],
+          totals: ["5g", "10g"],
+          sites: ["患部"]
+        },
+        {
+          type: "external",
+          name: "デルモベート軟膏0.05%",
+          reading: "デルモベートナンコウ0.05%",
+          usages: ["1日2回"],
+          totals: ["5g", "10g"],
+          sites: ["患部"]
+        },
+        {
+          type: "external",
+          name: "ゲンタシン軟膏0.1%",
+          reading: "ゲンタシンナンコウ0.1%",
+          usages: ["1日2回"],
+          totals: ["5g", "10g"],
+          sites: ["患部"]
+        },
+        {
+          type: "external",
+          name: "アクアチムクリーム1%",
+          reading: "アクアチムクリーム1%",
+          usages: ["1日2回"],
+          totals: ["10g"],
+          sites: ["患部"]
+        },
+        {
+          type: "external",
+          name: "ゼビアックスローション2%",
+          reading: "ゼビアックスローション2%",
+          usages: ["1日1回"],
+          totals: ["10g"],
+          sites: ["患部"]
+        },
+        {
+          type: "external",
+          name: "ニゾラールクリーム2%",
+          reading: "ニゾラールクリーム2%",
+          usages: ["1日1回"],
+          totals: ["10g"],
+          sites: ["患部"]
+        },
+        {
+          type: "external",
+          name: "ルリコンクリーム1%",
+          reading: "ルリコンクリーム1%",
+          usages: ["1日1回"],
+          totals: ["10g"],
+          sites: ["患部"]
+        },
+        {
+          type: "external",
+          name: "アスタットクリーム1%",
+          reading: "アスタットクリーム1%",
+          usages: ["1日1回"],
+          totals: ["10g"],
+          sites: ["患部"]
+        },
+        {
+          type: "external",
+          name: "プロペト",
+          reading: "プロペト",
+          usages: ["1日2回"],
+          totals: ["50g", "100g"],
+          sites: ["患部"]
+        },
+        {
+          type: "external",
+          name: "白色ワセリン",
+          reading: "ハクショクワセリン",
+          usages: ["1日2回"],
+          totals: ["50g", "100g"],
+          sites: ["患部"]
+        },
+        {
+          type: "regular",
+          name: "オロパタジン塩酸塩錠5mg",
+          reading: "オロパタジンエンサンエンジョウ5mg",
+          amounts: ["2錠"],
+          usages: ["分2 朝夕食後"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "ベポタスチンベシル酸塩錠10mg",
+          reading: "ベポタスチンベシルサンエンジョウ10mg",
+          amounts: ["2錠"],
+          usages: ["分2 朝夕食後"],
+          days: [7, 14, 28]
+        }
+      ]
+    },
+    {
+      department: "眼科",
+      theme: "点眼薬",
+      difficulty: "むずかしい",
+      note: "点眼薬は全量、使用部位、用法を入力。右眼・左眼・両眼の違いに注意。",
+      drugs: [
+        {
+          type: "external",
+          name: "ヒアレイン点眼液0.1%",
+          reading: "ヒアレインテンガンエキ0.1%",
+          usages: ["1日4回"],
+          totals: ["1本", "2本"],
+          sites: ["両眼", "右眼", "左眼"]
+        },
+        {
+          type: "external",
+          name: "ジクアスLX点眼液3%",
+          reading: "ジクアスLXテンガンエキ3%",
+          usages: ["1日3回"],
+          totals: ["1本", "2本"],
+          sites: ["両眼"]
+        },
+        {
+          type: "external",
+          name: "ムコスタ点眼液UD2%",
+          reading: "ムコスタテンガンエキUD2%",
+          usages: ["1日4回"],
+          totals: ["30本", "60本"],
+          sites: ["両眼"]
+        },
+        {
+          type: "external",
+          name: "クラビット点眼液1.5%",
+          reading: "クラビットテンガンエキ1.5%",
+          usages: ["1日3回"],
+          totals: ["1本"],
+          sites: ["右眼", "左眼", "両眼"]
+        },
+        {
+          type: "external",
+          name: "フルメトロン点眼液0.1%",
+          reading: "フルメトロンテンガンエキ0.1%",
+          usages: ["1日4回"],
+          totals: ["1本"],
+          sites: ["右眼", "左眼", "両眼"]
+        },
+        {
+          type: "external",
+          name: "リンデロン点眼液0.1%",
+          reading: "リンデロンテンガンエキ0.1%",
+          usages: ["1日4回"],
+          totals: ["1本"],
+          sites: ["右眼", "左眼", "両眼"]
+        },
+        {
+          type: "external",
+          name: "アレジオンLX点眼液0.1%",
+          reading: "アレジオンLXテンガンエキ0.1%",
+          usages: ["1日2回"],
+          totals: ["1本"],
+          sites: ["両眼"]
+        },
+        {
+          type: "external",
+          name: "パタノール点眼液0.1%",
+          reading: "パタノールテンガンエキ0.1%",
+          usages: ["1日4回"],
+          totals: ["1本"],
+          sites: ["両眼"]
+        },
+        {
+          type: "external",
+          name: "コソプト配合点眼液",
+          reading: "コソプトハイゴウテンガンエキ",
+          usages: ["1日2回"],
+          totals: ["1本"],
+          sites: ["両眼", "右眼", "左眼"]
+        },
+        {
+          type: "external",
+          name: "キサラタン点眼液0.005%",
+          reading: "キサラタンテンガンエキ0.005%",
+          usages: ["1日1回"],
+          totals: ["1本"],
+          sites: ["両眼", "右眼", "左眼"]
+        },
+        {
+          type: "external",
+          name: "タプロス点眼液0.0015%",
+          reading: "タプロステンガンエキ0.0015%",
+          usages: ["1日1回"],
+          totals: ["1本"],
+          sites: ["両眼", "右眼", "左眼"]
+        },
+        {
+          type: "external",
+          name: "アイファガン点眼液0.1%",
+          reading: "アイファガンテンガンエキ0.1%",
+          usages: ["1日2回"],
+          totals: ["1本"],
+          sites: ["両眼", "右眼", "左眼"]
+        }
+      ]
+    },
+    {
+      department: "小児科",
+      theme: "小児処方",
+      difficulty: "むずかしい",
+      note: "小児用量の小数、粉薬、貼付剤、坐剤の入力を練習。",
+      drugs: [
+        {
+          type: "regular",
+          name: "アスベリン散10%",
+          reading: "アスベリンサン10%",
+          amounts: ["0.6g", "0.9g"],
+          usages: ["分3 毎食後"],
+          days: [5, 7]
+        },
+        {
+          type: "regular",
+          name: "ムコダインDS50%",
+          reading: "ムコダインDS50%",
+          amounts: ["1.2g", "1.5g"],
+          usages: ["分3 毎食後"],
+          days: [5, 7]
+        },
+        {
+          type: "regular",
+          name: "ホクナリンドライシロップ0.1%",
+          reading: "ホクナリンドライシロップ0.1%",
+          amounts: ["0.5g"],
+          usages: ["分2 朝夕食後"],
+          days: [5, 7]
+        },
+        {
+          type: "regular",
+          name: "クラリスドライシロップ10%小児用",
+          reading: "クラリスドライシロップ10%ショウニヨウ",
+          amounts: ["1.0g", "1.5g"],
+          usages: ["分2 朝夕食後"],
+          days: [5, 7]
+        },
+        {
+          type: "regular",
+          name: "ワイドシリン細粒20%",
+          reading: "ワイドシリンサイリュウ20%",
+          amounts: ["1.5g", "2.0g"],
+          usages: ["分3 毎食後"],
+          days: [5, 7]
+        },
+        {
+          type: "regular",
+          name: "セフゾン細粒小児用10%",
+          reading: "セフゾンサイリュウショウニヨウ10%",
+          amounts: ["1.5g", "2.0g"],
+          usages: ["分3 毎食後"],
+          days: [5, 7]
+        },
+        {
+          type: "regular",
+          name: "オノンドライシロップ10%",
+          reading: "オノンドライシロップ10%",
+          amounts: ["0.7g", "1.0g"],
+          usages: ["分2 朝夕食後"],
+          days: [7, 14]
+        },
+        {
+          type: "regular",
+          name: "ザイザルシロップ0.05%",
+          reading: "ザイザルシロップ0.05%",
+          amounts: ["5mL", "10mL"],
+          usages: ["分1 就寝前"],
+          days: [7, 14]
+        },
+        {
+          type: "regular",
+          name: "ビオフェルミンR散",
+          reading: "ビオフェルミンRサン",
+          amounts: ["1.5g", "3.0g"],
+          usages: ["分3 毎食後"],
+          days: [5, 7]
+        },
+        {
+          type: "regular",
+          name: "ミヤBM細粒",
+          reading: "ミヤBMサイリュウ",
+          amounts: ["1.5g", "3.0g"],
+          usages: ["分3 毎食後"],
+          days: [5, 7]
+        },
+        {
+          type: "external",
+          name: "ツロブテロールテープ0.5mg",
+          reading: "ツロブテロールテープ0.5mg",
+          usages: ["1日1回"],
+          totals: ["7枚"],
+          sites: ["胸部", "背部"]
+        },
+        {
+          type: "external",
+          name: "ツロブテロールテープ1mg",
+          reading: "ツロブテロールテープ1mg",
+          usages: ["1日1回"],
+          totals: ["7枚"],
+          sites: ["胸部", "背部"]
+        },
+        {
+          type: "prn",
+          name: "カロナール細粒20%",
+          reading: "カロナールサイリュウ20%",
+          perDoses: ["1.0g"],
+          timings: ["発熱時"],
+          times: [5, 8]
+        },
+        {
+          type: "prn",
+          name: "アンヒバ坐剤小児用100mg",
+          reading: "アンヒバザザイショウニヨウ100mg",
+          perDoses: ["1個"],
+          timings: ["発熱時"],
+          times: [5, 8]
+        },
+        {
+          type: "prn",
+          name: "ナウゼリン坐剤10mg",
+          reading: "ナウゼリンザザイ10mg",
+          perDoses: ["1個"],
+          timings: ["吐き気時"],
+          times: [5]
+        }
+      ]
+    },
+    {
+      department: "泌尿器科",
+      theme: "排尿トラブル",
+      difficulty: "標準",
+      note: "OD錠や就寝前用法を含む処方。",
+      drugs: [
+        {
+          type: "regular",
+          name: "タムスロシン塩酸塩OD錠0.2mg",
+          reading: "タムスロシンエンサンエンODジョウ0.2mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "シロドシンOD錠4mg",
+          reading: "シロドシンODジョウ4mg",
+          amounts: ["2錠"],
+          usages: ["分2 朝夕食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "ベタニス錠50mg",
+          reading: "ベタニスジョウ50mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "ベオーバ錠50mg",
+          reading: "ベオーバジョウ50mg",
+          amounts: ["1錠"],
+          usages: ["分1 朝食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "イミダフェナシンOD錠0.1mg",
+          reading: "イミダフェナシンODジョウ0.1mg",
+          amounts: ["2錠"],
+          usages: ["分2 朝夕食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "セルニルトン錠",
+          reading: "セルニルトンジョウ",
+          amounts: ["6錠"],
+          usages: ["分3 毎食後"],
+          days: [14, 28, 30]
+        },
+        {
+          type: "regular",
+          name: "ウラリット配合錠",
+          reading: "ウラリットハイゴウジョウ",
+          amounts: ["6錠"],
+          usages: ["分3 毎食後"],
+          days: [14, 28, 30]
+        }
+      ]
+    },
+    {
+      department: "心療内科",
+      theme: "睡眠・不安",
+      difficulty: "標準",
+      note: "就寝前・不眠時などタイミングを区別して入力。",
+      drugs: [
+        {
+          type: "regular",
+          name: "レンボレキサント錠5mg",
+          reading: "レンボレキサントジョウ5mg",
+          amounts: ["1錠"],
+          usages: ["分1 就寝前"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "ラメルテオン錠8mg",
+          reading: "ラメルテオンジョウ8mg",
+          amounts: ["1錠"],
+          usages: ["分1 就寝前"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "トラゾドン塩酸塩錠25mg",
+          reading: "トラゾドンエンサンエンジョウ25mg",
+          amounts: ["1錠", "2錠"],
+          usages: ["分1 就寝前"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "prn",
+          name: "ゾルピデム酒石酸塩錠5mg",
+          reading: "ゾルピデムシュセキサンエンジョウ5mg",
+          perDoses: ["1錠"],
+          timings: ["不眠時"],
+          times: [5, 10]
+        },
+        {
+          type: "prn",
+          name: "エチゾラム錠0.5mg",
+          reading: "エチゾラムジョウ0.5mg",
+          perDoses: ["1錠"],
+          timings: ["不安時"],
+          times: [5, 10]
+        },
+        {
+          type: "regular",
+          name: "抑肝散エキス顆粒",
+          reading: "ヨクカンサンエキスカリュウ",
+          amounts: ["7.5g"],
+          usages: ["分3 毎食前"],
+          days: [7, 14, 28]
+        }
+      ]
+    },
+    {
+      department: "漢方外来",
+      theme: "漢方処方",
+      difficulty: "むずかしい",
+      note: "漢方薬は名称が長いため、候補検索を活用して入力。",
+      drugs: [
+        {
+          type: "regular",
+          name: "葛根湯エキス顆粒",
+          reading: "カッコントウエキスカリュウ",
+          amounts: ["7.5g"],
+          usages: ["分3 毎食前"],
+          days: [5, 7, 14]
+        },
+        {
+          type: "regular",
+          name: "小青竜湯エキス顆粒",
+          reading: "ショウセイリュウトウエキスカリュウ",
+          amounts: ["9.0g"],
+          usages: ["分3 毎食前"],
+          days: [5, 7, 14]
+        },
+        {
+          type: "regular",
+          name: "麦門冬湯エキス顆粒",
+          reading: "バクモンドウトウエキスカリュウ",
+          amounts: ["9.0g"],
+          usages: ["分3 毎食前"],
+          days: [5, 7, 14]
+        },
+        {
+          type: "regular",
+          name: "大建中湯エキス顆粒",
+          reading: "ダイケンチュウトウエキスカリュウ",
+          amounts: ["15.0g"],
+          usages: ["分3 毎食前"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "regular",
+          name: "補中益気湯エキス顆粒",
+          reading: "ホチュウエッキトウエキスカリュウ",
+          amounts: ["7.5g"],
+          usages: ["分3 毎食前"],
+          days: [7, 14, 28]
+        },
+        {
+          type: "prn",
+          name: "芍薬甘草湯エキス顆粒",
+          reading: "シャクヤクカンゾウトウエキスカリュウ",
+          perDoses: ["2.5g"],
+          timings: ["こむら返り時"],
+          times: [5, 10]
+        },
+        {
+          type: "regular",
+          name: "当帰芍薬散エキス顆粒",
+          reading: "トウキシャクヤクサンエキスカリュウ",
+          amounts: ["7.5g"],
+          usages: ["分3 毎食前"],
+          days: [14, 28]
+        },
+        {
+          type: "regular",
+          name: "加味逍遙散エキス顆粒",
+          reading: "カミショウヨウサンエキスカリュウ",
+          amounts: ["7.5g"],
+          usages: ["分3 毎食前"],
+          days: [14, 28]
+        }
       ]
     }
   ];
@@ -1023,7 +2385,7 @@
   function buildUsageMaster() {
     const map = new Map();
     const add = (text, kind) => addTextMasterItem(map, text, kind);
-    ['分1 朝食後', '分1 朝食前', '分1 夕食後', '分2 朝夕食後', '分2 朝食後・夕食後', '分3 毎食後', '分3 毎食前', '1日1回', '1日2回', '疼痛時', '発熱時', '頭痛時', '不眠時', '便秘時', '悪心時'].forEach(text => add(text, '標準候補'));
+    ['分1 朝食後', '分1 朝食前', '分1 夕食後', '分1 就寝前', '分1 起床時', '分1 空腹時', '分2 朝夕食後', '分2 朝食後・夕食後', '分3 毎食後', '分3 毎食前', '分3 毎食直前', '分4 毎食後・就寝前', '1日1回', '1日2回', '1日3回', '1日4回', '疼痛時', '発熱時', '頭痛時', '不眠時', '便秘時', '悪心時', '咳がひどい時', '吐き気時', '不安時', 'こむら返り時'].forEach(text => add(text, '標準候補'));
     MED_SETS.forEach((set) => {
       set.drugs.forEach((drug) => {
         (drug.usages || []).forEach(text => add(text, `${set.department} / ${set.theme}`));
@@ -1036,7 +2398,7 @@
   function buildSiteMaster() {
     const map = new Map();
     const add = (text, kind) => addTextMasterItem(map, text, kind);
-    ['患部', '胸部', '背部', '腰部', '右肩', '左肩', '右膝', '左膝', '右肘', '左肘', '顔', '手', '足'].forEach(text => add(text, '使用部位'));
+    ['患部', '胸部', '背部', '腰部', '右肩', '左肩', '右膝', '左膝', '右肘', '左肘', '顔', '手', '足', '両眼', '右眼', '左眼', '両鼻'].forEach(text => add(text, '使用部位'));
     MED_SETS.forEach((set) => {
       set.drugs.forEach((drug) => (drug.sites || []).forEach(text => add(text, `${set.department} / ${set.theme}`)));
     });
@@ -1044,7 +2406,7 @@
   }
 
   function buildDailyCountMaster() {
-    return [1, 2, 3, 4].map((count) => ({
+    return [1, 2, 3, 4, 5, 6].map((count) => ({
       text: String(count),
       kind: `1日${count}回`,
       searchText: String(count),
