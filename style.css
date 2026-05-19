@@ -52,6 +52,12 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .hero h1 { margin: 0; font-size: clamp(28px, 4vw, 46px); line-height: 1.15; letter-spacing: .02em; }
 .hero-copy { margin: 10px 0 0; opacity: .92; font-size: 16px; }
 .eyebrow { margin: 0 0 8px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; opacity: .78; }
+.hero-actions {
+  display: grid;
+  gap: 10px;
+  justify-items: end;
+  align-content: center;
+}
 .hero-badges { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 .badge, .difficulty {
   display: inline-flex;
@@ -66,6 +72,17 @@ button:disabled { opacity: .55; cursor: not-allowed; }
   white-space: nowrap;
 }
 .badge.ghost { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22); }
+.version-badge { background: rgba(255,255,255,.96); color: #0f5f59; }
+.update-button {
+  min-height: 40px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.96);
+  color: #0f5f59;
+  font-weight: 900;
+  box-shadow: 0 10px 22px rgba(15, 32, 31, .16);
+}
+.update-button:hover { transform: translateY(-1px); filter: brightness(1.01); }
 
 .panel {
   background: rgba(255,255,255,.92);
@@ -342,6 +359,7 @@ footer { text-align: center; padding: 22px 0 0; }
 
 @media (max-width: 920px) {
   .hero { align-items: flex-start; flex-direction: column; }
+  .hero-actions { justify-items: start; }
   .mode-grid { grid-template-columns: repeat(2, 1fr); }
   .form-grid, .patient-input-grid { grid-template-columns: 1fr; }
   .score-panel { grid-template-columns: repeat(2, 1fr); }

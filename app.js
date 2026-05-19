@@ -1,6 +1,7 @@
 (() => {
   'use strict';
 
+  const APP_VERSION = 'v5.0.0';
   const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbzKs2dbznSXPyNJWY0L2Wzfed5m834wBa8FLP9paAyaSJZ6dIx-eST16D3eTVICBs2rRw/exec';
 
   const STORAGE_KEYS = {
@@ -88,7 +89,10 @@
     startButton: document.querySelector('#startButton'),
     rankingButton: document.querySelector('#rankingButton'),
     installButton: document.querySelector('#installButton'),
+    updateButton: document.querySelector('#updateButton'),
     installStatus: document.querySelector('#installStatus'),
+    versionBadge: document.querySelector('#versionBadge'),
+    versionText: document.querySelector('#versionText'),
     scoreValue: document.querySelector('#scoreValue'),
     timerValue: document.querySelector('#timerValue'),
     progressValue: document.querySelector('#progressValue'),
@@ -144,6 +148,7 @@
 
   function init() {
     els.playerName.value = localStorage.getItem(STORAGE_KEYS.player) || '';
+    setVersionText();
     setupModeCards();
     bindEvents();
     registerServiceWorker();
@@ -167,6 +172,7 @@
     els.reloadRankingButton.addEventListener('click', () => showRanking());
     els.rankingMode.addEventListener('change', () => showRanking());
     els.installButton.addEventListener('click', installPwa);
+    els.updateButton.addEventListener('click', forceUpdateApp);
     els.birthDateInput.addEventListener('input', () => formatBirthDateInput(els.birthDateInput));
     window.addEventListener('resize', positionCandidateBox);
     window.addEventListener('scroll', positionCandidateBox, true);
@@ -181,6 +187,42 @@
       els.installButton.classList.add('hidden');
       els.installStatus.textContent = 'インストール済み';
     });
+  }
+
+  function setVersionText() {
+    if (els.versionBadge) els.versionBadge.textContent = APP_VERSION;
+    if (els.versionText) els.versionText.textContent = `Version ${APP_VERSION}`;
+  }
+
+  async function forceUpdateApp() {
+    const button = els.updateButton;
+    try {
+      if (button) {
+        button.disabled = true;
+        button.textContent = '更新中...';
+      }
+
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((registration) => registration.update().catch(() => null)));
+      }
+
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((key) => caches.delete(key)));
+      }
+
+      const url = new URL(window.location.href);
+      url.searchParams.set('v', String(Date.now()));
+      window.location.replace(url.toString());
+    } catch (error) {
+      console.error(error);
+      if (button) {
+        button.disabled = false;
+        button.textContent = '最新版に更新';
+      }
+      alert('更新に失敗しました。通信状況を確認してから、もう一度お試しください。');
+    }
   }
 
   function setupModeCards() {
